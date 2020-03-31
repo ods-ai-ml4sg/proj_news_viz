@@ -1,11 +1,10 @@
 import configparser
 import os
 import time
-
 from uuid import uuid4
 
-# Коннектор к базе данных
 from dbconnector import UseDatabase
+# Коннектор к базе данных
 
 
 class Dbwriter(object):
@@ -102,6 +101,7 @@ class Dbwriter(object):
 
 class DataBaseCorpusReader(object):
     """Читает данные из базы"""
+
     def __init__(self):
         # database connect
         config = configparser.ConfigParser()
@@ -138,16 +138,16 @@ class DataBaseCorpusReader(object):
         source - идентификатор источника данных, полученный get_news_source_raw
         """
         with UseDatabase(self.dbconfig) as cursor:
-            if source is None :
-                sql = """SELECT id_raw_data, id_news_source, "date", url, edition, topics, authors, title, "text", 
-                         reposts_fb, reposts_vk, reposts_ok, reposts_twi, reposts_lj, reposts_tg, likes, "views", 
-                         comm_count, created_date, modified_date, batch_date 
+            if source is None:
+                sql = """SELECT id_raw_data, id_news_source, "date", url, edition, topics, authors, title, "text",
+                         reposts_fb, reposts_vk, reposts_ok, reposts_twi, reposts_lj, reposts_tg, likes, "views",
+                         comm_count, created_date, modified_date, batch_date
                          FROM raw_data.raw_data"""
                 cursor.execute(sql, )
             else:
-                sql = """SELECT id_raw_data, id_news_source, "date", url, edition, topics, authors, title, "text", 
-                                     reposts_fb, reposts_vk, reposts_ok, reposts_twi, reposts_lj, reposts_tg, likes, 
-                                     "views", comm_count, created_date, modified_date, batch_date 
+                sql = """SELECT id_raw_data, id_news_source, "date", url, edition, topics, authors, title, "text",
+                                     reposts_fb, reposts_vk, reposts_ok, reposts_twi, reposts_lj, reposts_tg, likes,
+                                     "views", comm_count, created_date, modified_date, batch_date
                                      FROM raw_data.raw_data
                                      WHERE id_news_source= %s"""
                 cursor.execute(sql, (source, ))
@@ -166,8 +166,8 @@ class DataBaseCorpusReader(object):
         source - идентификатор источника данных, полученный get_news_source_raw
         """
         with UseDatabase(self.dbconfig) as cursor:
-            if source is None :
-                sql = """SELECT "text" 
+            if source is None:
+                sql = """SELECT "text"
                          FROM raw_data.raw_data"""
                 cursor.execute(sql, )
             else:
