@@ -4,6 +4,7 @@ import time
 from uuid import uuid4
 
 from dbconnector import UseDatabase
+
 # Коннектор к базе данных
 
 
@@ -50,7 +51,7 @@ class Dbwriter(object):
         with UseDatabase(dbconfig) as cursor:
             sql = "SELECT * FROM raw_data.news_source WHERE name= %s"
 
-            cursor.execute(sql, (news_source, ))
+            cursor.execute(sql, (news_source,))
             query_results = cursor.fetchall()
 
             sql = """INSERT INTO raw_data.raw_data
@@ -94,8 +95,7 @@ class Dbwriter(object):
     def write_file(self, fileids=None, categories=None):
         # Получить имена файлов для обработки
         return [
-            self.__process(fileid)
-            for fileid in self.__get_fileids(fileids, categories)
+            self.__process(fileid) for fileid in self.__get_fileids(fileids, categories)
         ]
 
 
@@ -123,7 +123,7 @@ class DataBaseCorpusReader(object):
         with UseDatabase(self.dbconfig) as cursor:
             sql = """SELECT id_news_source, "name" FROM raw_data.news_source;"""
 
-            cursor.execute(sql, )
+            cursor.execute(sql,)
             query_results = cursor.fetchall()
 
             for news_source in query_results:
@@ -143,14 +143,14 @@ class DataBaseCorpusReader(object):
                          reposts_fb, reposts_vk, reposts_ok, reposts_twi, reposts_lj, reposts_tg, likes, "views",
                          comm_count, created_date, modified_date, batch_date
                          FROM raw_data.raw_data"""
-                cursor.execute(sql, )
+                cursor.execute(sql,)
             else:
                 sql = """SELECT id_raw_data, id_news_source, "date", url, edition, topics, authors, title, "text",
                                      reposts_fb, reposts_vk, reposts_ok, reposts_twi, reposts_lj, reposts_tg, likes,
                                      "views", comm_count, created_date, modified_date, batch_date
                                      FROM raw_data.raw_data
                                      WHERE id_news_source= %s"""
-                cursor.execute(sql, (source, ))
+                cursor.execute(sql, (source,))
 
             query_results = cursor.fetchall()
 
@@ -169,12 +169,12 @@ class DataBaseCorpusReader(object):
             if source is None:
                 sql = """SELECT "text"
                          FROM raw_data.raw_data"""
-                cursor.execute(sql, )
+                cursor.execute(sql,)
             else:
                 sql = """SELECT "text"
                          FROM raw_data.raw_data
                          WHERE id_news_source= %s"""
-                cursor.execute(sql, (source, ))
+                cursor.execute(sql, (source,))
 
             query_results = cursor.fetchall()
 
