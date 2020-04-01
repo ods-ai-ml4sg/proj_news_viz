@@ -38,7 +38,7 @@ class Dbwriter(object):
 
         # database connect
         config = configparser.ConfigParser()
-        config.read("../../../config/db.ini")
+        config.read("../../config/db.ini")
 
         dbconfig = {
             "host": config["dev"]["host"],
