@@ -53,7 +53,7 @@ class Dbwriter(object):
         with UseDatabase(dbconfig) as cursor:
             sql = "SELECT * FROM raw_data.news_source WHERE name= %s"
 
-            cursor.execute(sql, (news_source,))
+            cursor.execute(sql, (news_source, ))
             query_results = cursor.fetchall()
 
             sql = """INSERT INTO raw_data.raw_data
@@ -97,7 +97,8 @@ class Dbwriter(object):
     def write_file(self, fileids=None, categories=None):
         # Получить имена файлов для обработки
         return [
-            self.__process(fileid) for fileid in self.__get_fileids(fileids, categories)
+            self.__process(fileid)
+            for fileid in self.__get_fileids(fileids, categories)
         ]
 
 
