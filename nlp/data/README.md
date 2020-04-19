@@ -1,4 +1,4 @@
-## data
+# data
 
 - **external** _(data from third party sources interim)_:
 
@@ -8,8 +8,6 @@
 
 - **interim** _(intermediate data that has been transformed)_:
 
-  - `lenta_ru_news-cleaned-lemmatize.csv.gz` - _711724 rows; 'title'+'text',
-    cleaned, lemmatized, remove stop-words; columns=[url,lemma_text])_
 
 - **processed** _(the final, canonical data sets for modeling)_:
 
