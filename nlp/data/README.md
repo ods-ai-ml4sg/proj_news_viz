@@ -18,4 +18,4 @@
   - `...`
 
 - **features** _(another files)_:
-  - `stopwords_ru.txt` - _(624 samples)_
+  - `stopwords_ru.txt` - _624 samples_
