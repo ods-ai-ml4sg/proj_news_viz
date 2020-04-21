@@ -11,10 +11,10 @@ from newsbot.spiders.news import NewsSpider, NewsSpiderConfig
 class MeduzaSpider(NewsSpider):
     name = 'meduza'
     page_link_tmpl = 'https://meduza.io/api/v3/search?chrono=news&page={}&per_page=24&locale=ru'
-    article_link_tmpl  = 'https://meduza.io/{}'
+    article_link_tmpl = 'https://meduza.io/{}'
     start_urls = [page_link_tmpl.format(0)]
     months_ru = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября',
-                 'октября', 'ноября', 'декабря',]
+                 'октября', 'ноября', 'декабря', ]
     fields = ['title', 'topics', 'authors', 'edition', 'url', 'text', 'date', ]
 
     config = NewsSpiderConfig(
@@ -44,14 +44,17 @@ class MeduzaSpider(NewsSpider):
         jsonresponse = json.loads(response.body_as_unicode())
 
         # Getting article items
-        articles = [content for _, content in jsonresponse['documents'].items()]
+        articles = [content for _,
+                    content in jsonresponse['documents'].items()]
         # Sorting them from the most recent to the most late one
-        articles = sorted(articles, key=lambda x: x['published_at'], reverse=True)
+        articles = sorted(
+            articles, key=lambda x: x['published_at'], reverse=True)
 
         # Filtering out late articles and checking if we have reached the "until_date"
         filtered_articles = []
         for content in articles:
-            pub_date = datetime.strptime(content['pub_date'], '%Y-%m-%d').date()
+            pub_date = datetime.strptime(
+                content['pub_date'], '%Y-%m-%d').date()
             if pub_date >= self.until_date:
                 filtered_articles.append(content)
             else:
@@ -81,6 +84,6 @@ class MeduzaSpider(NewsSpider):
                 if field not in res:
                     res[field] = ['']
             for i, month in enumerate(self.months_ru):
-                res['date'][0] = res['date'][0].replace(month, str(i+1))
+                res['date'][0] = res['date'][0].replace(month, str(i + 1))
 
             yield res
