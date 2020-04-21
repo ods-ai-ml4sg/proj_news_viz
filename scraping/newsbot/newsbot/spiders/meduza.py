@@ -1,11 +1,10 @@
-from scrapy import Request, Selector
-
-from scrapy.linkextractors import LinkExtractor
 import json
 from datetime import datetime
 
 import scrapy
 from newsbot.spiders.news import NewsSpider, NewsSpiderConfig
+from scrapy import Request, Selector
+from scrapy.linkextractors import LinkExtractor
 
 
 class MeduzaSpider(NewsSpider):
