@@ -41,12 +41,15 @@ class MeduzaSpider(NewsSpider):
     ]
 
     config = NewsSpiderConfig(
-        title_path='//h1[@class="RichTitle-root" or @class="SimpleTitle-root" or '
-        + '@class="RichTitle-root RichTitle-slide"]//text()',
+        title_path=
+        '//h1[@class="RichTitle-root" or @class="SimpleTitle-root" or ' +
+        '@class="RichTitle-root RichTitle-slide"]//text()',
         date_path='//time[@class="Timestamp-root"]/text()',
         date_format="%H:%M, %d %m %Y",
-        text_path='//div[@class="GeneralMaterial-article" or @class="SlidesMaterial-layout" '
-        + 'or @class="MediaCaption-caption"]//p//text() | //div[@class="MediaCaption-caption"]//text() | '
+        text_path=
+        '//div[@class="GeneralMaterial-article" or @class="SlidesMaterial-layout" '
+        +
+        'or @class="MediaCaption-caption"]//p//text() | //div[@class="MediaCaption-caption"]//text() | '
         + '//p[@class="SimpleBlock-p" or @class="SimpleBlock-lead"]//text()',
         topics_path="_",
         authors_path='//p[@class="MaterialNote-note_caption"]/strong/text()',
@@ -67,14 +70,19 @@ class MeduzaSpider(NewsSpider):
         jsonresponse = json.loads(response.body_as_unicode())
 
         # Getting article items
-        articles = [content for _, content in jsonresponse["documents"].items()]
+        articles = [
+            content for _, content in jsonresponse["documents"].items()
+        ]
         # Sorting them from the most recent to the most late one
-        articles = sorted(articles, key=lambda x: x["published_at"], reverse=True)
+        articles = sorted(articles,
+                          key=lambda x: x["published_at"],
+                          reverse=True)
 
         # Filtering out late articles and checking if we have reached the "until_date"
         filtered_articles = []
         for content in articles:
-            pub_date = datetime.strptime(content["pub_date"], "%Y-%m-%d").date()
+            pub_date = datetime.strptime(content["pub_date"],
+                                         "%Y-%m-%d").date()
             if pub_date >= self.until_date:
                 filtered_articles.append(content)
             else:
