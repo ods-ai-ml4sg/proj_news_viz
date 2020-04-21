@@ -26,7 +26,7 @@ class MeduzaSpider(NewsSpider):
                   'or @class="MediaCaption-caption"]//p//text() | //div[@class="MediaCaption-caption"]//text() | ' +
                   '//p[@class="SimpleBlock-p" or @class="SimpleBlock-lead"]//text()',
         topics_path='_',
-        authors_path='_',
+        authors_path='//p[@class="MaterialNote-note_caption"]/strong/text()',
         reposts_fb_path='_',
         reposts_vk_path='_',
         reposts_ok_path='_',
