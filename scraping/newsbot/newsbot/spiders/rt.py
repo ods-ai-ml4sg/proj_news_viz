@@ -6,7 +6,6 @@ from datetime import datetime
 
 class RussiaTodaySpider(NewsSpider):
     name = 'rt'
-    
 
     start_urls = ['https://russian.rt.com/sitemap.xml']
 
@@ -58,26 +57,26 @@ class RussiaTodaySpider(NewsSpider):
 
         for i in range(len(links)):
             if 'https://russian.rt.com/tag/' not in links[i]:
-                if datetime.strptime(lm_datetimes[i][:22]+'00', 
-                            "%Y-%m-%dT%H:%M:%S%z").date() >= self.until_date: 
+                if datetime.strptime(lm_datetimes[i][:22] + '00',
+                                     "%Y-%m-%dT%H:%M:%S%z").date() >= self.until_date:
                     yield Request(url=links[i],
                                   callback=self.parse_document)
 
     def fix_date(self, raw_date):
         """Fix date for regular and authors articles
         """
-        months_ru = ['января', 'февраля', 'марта', 'апреля', 
-                     'мая', 'июня', 'июля', 'августа', 
-                     'сентября', 'октября', 'ноября', 'декабря',]
-        
+        months_ru = ['января', 'февраля', 'марта', 'апреля',
+                     'мая', 'июня', 'июля', 'августа',
+                     'сентября', 'октября', 'ноября', 'декабря', ]
+
         if len(raw_date[0]) == 25:
-            raw_date[0]=raw_date[0][:19]
-            return raw_date 
+            raw_date[0] = raw_date[0][:19]
+            return raw_date
         else:
             for i, month in enumerate(months_ru):
-                raw_date[0] = raw_date[0].replace(month, str(i+1)) 
-            return datetime.strptime(raw_date[0],"%d %m %Y,").strftime("%Y-%m-%dT%H:%M:%S")
-    
+                raw_date[0] = raw_date[0].replace(month, str(i + 1))
+            return datetime.strptime(raw_date[0], "%d %m %Y,").strftime("%Y-%m-%dT%H:%M:%S")
+
     def cut_instagram(self, raw_text):
         """Cut instagram quote
         """
@@ -85,7 +84,7 @@ class RussiaTodaySpider(NewsSpider):
         i = 0
         while i < len(raw_text):
             if ' Посмотреть эту публикацию в Instagram' == raw_text[i]:
-               
+
                 while 'PDT' not in raw_text[i]:
                     i += 1
                 i += 1
