@@ -58,12 +58,9 @@ class RussiaTodaySpider(NewsSpider):
 
         for i in range(len(links)):
             if "https://russian.rt.com/tag/" not in links[i]:
-                if (
-                    datetime.strptime(
-                        lm_datetimes[i][:22] + "00", "%Y-%m-%dT%H:%M:%S%z"
-                    ).date()
-                    >= self.until_date
-                ):
+                if (datetime.strptime(lm_datetimes[i][:22] + "00",
+                                      "%Y-%m-%dT%H:%M:%S%z").date() >=
+                        self.until_date):
                     yield Request(url=links[i], callback=self.parse_document)
 
     def fix_date(self, raw_date):
@@ -90,9 +87,8 @@ class RussiaTodaySpider(NewsSpider):
         else:
             for i, month in enumerate(months_ru):
                 raw_date[0] = raw_date[0].replace(month, str(i + 1))
-            return datetime.strptime(raw_date[0], "%d %m %Y,").strftime(
-                "%Y-%m-%dT%H:%M:%S"
-            )
+            return datetime.strptime(raw_date[0],
+                                     "%d %m %Y,").strftime("%Y-%m-%dT%H:%M:%S")
 
     def cut_instagram(self, raw_text):
         """Cut instagram quote
