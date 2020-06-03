@@ -4,8 +4,7 @@ import time
 from datetime import datetime
 from uuid import uuid4
 
-from dbconnector import UseDatabase
-from dbconnector import UseDatabaseCusror
+from dbconnector import UseDatabase, UseDatabaseCusror
 
 # Коннектор к базе данных
 
