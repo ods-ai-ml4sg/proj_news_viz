@@ -6,9 +6,6 @@ import logging
 import pandas as pd
 from preprocessing_tools import clean_text, lemmatize
 import joblib
-from rubric_classifier import make_feats
-
-# from topic_extractor import apply_model
 
 # TODO: set default paths
 # TODO: add docstrings
@@ -32,13 +29,13 @@ class PreprocessorTask(luigi.Task):
             data["cleaned_text"] = data["text"].apply(clean_text)
             data["lemmatized"] = data["cleaned_text"].apply(lemmatize)
             data[["date", "topics", "lemmatized"]].to_csv(
-                writepath, index=False, compression="gzip"
+                writepath + '.gz', index=False, compression="gzip"
             )
 
     def output(self):
         outputs = []
         for fname in self.fnames:
-            writepath = os.path.join(self.output_path, fname)
+            writepath = os.path.join(self.output_path, fname) + '.gz'
             outputs.append(luigi.LocalTarget(writepath))
         return outputs
 
@@ -47,13 +44,12 @@ class RubricClassifierTask(luigi.Task):
     input_path = luigi.Parameter()
     output_path = luigi.Parameter()
     classifier_path = luigi.Parameter()
+    ftransformer_path = luigi.Parameter()
 
     def __init__(self, *args, **kwargs):
         super(RubricClassifierTask, self).__init__(*args, **kwargs)
         # TODO: check if is file
         self.fnames = os.listdir(self.input_path)
-
-    # fnames = os.listdir(input_path)
 
     def requires(self):
         return PreprocessorTask(output_path=self.input_path)
@@ -61,21 +57,23 @@ class RubricClassifierTask(luigi.Task):
     def run(self):
         # TODO: add class to classname mapping
         model = joblib.load(self.classifier_path)
+        feats_trnsfr = joblib.load(self.ftransformer_path)
+        
         for fname in self.fnames:
             readpath = os.path.join(self.input_path, fname)
             writepath = os.path.join(self.output_path, fname)
             data = pd.read_csv(readpath, compression="gzip")
-            feats = make_feats(data["lemmatized"].values)
+            feats = feats_trnsfr.transform(data["lemmatized"].values)
             preds = model.predict(feats)
             data["rubric_preds"] = preds
             data[["date", "rubric_preds"]].to_csv(
-                writepath, index=False, compression="gzip"
+                writepath + '.gz', index=False, compression="gzip"
             )
 
     def output(self):
         outputs = []
         for fname in self.fnames:
-            writepath = os.path.join(self.output_path, fname)
+            writepath = os.path.join(self.output_path, fname) + '.gz'
             outputs.append(luigi.LocalTarget(writepath))
         return outputs
 
