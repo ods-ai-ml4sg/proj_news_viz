@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 Vocab = List[Tuple[str, float]]
 
+
 def plotFrequencyWords(vocab: Vocab,
                        top_words: int = 30,
                        plt_background: Optional[str] = None) -> None:

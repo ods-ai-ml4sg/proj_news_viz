@@ -85,7 +85,10 @@ def lemmatize(text: str = None, char4split: str = " ") -> str:
     # in this case it's normal approach because we hard cleaned text
     list_tokens = text.split(char4split)
 
-    words_lem = [get_morph4token(token) for token in list_tokens if token not in stopwords]
+    words_lem = [
+        get_morph4token(token) for token in list_tokens
+        if token not in stopwords
+    ]
 
     if len(words_lem) < 3:
         return "TOREMOVE"
