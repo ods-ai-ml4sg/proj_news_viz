@@ -3,12 +3,14 @@ import re
 import sys
 from functools import lru_cache
 from pathlib import Path
+from typing import Dict
 
 import pymorphy2
 
 PATH = Path("../..")
 sys.path.append(str(PATH))
 
+cache: Dict = {}
 morph = pymorphy2.MorphAnalyzer()
 
 # read stopwords for RU
@@ -19,23 +21,17 @@ except FileNotFoundError:
     print("can't load /data/features/stopwords_ru.txt")
     stopwords = []
 
-# for cache
-cache = {}
-
 
 def clean_text(text: str = None) -> str:
     """
     clean text, leaving only tokens for clustering
-
-    Parameters
+    parameters
     ----------
         text : string
             input text
-
-    Returns
+    returns
     -------
-        text : string
-            cleaned string text
+        cleaned string text without lower case
     """
 
     if not isinstance(text, str):
@@ -43,11 +39,13 @@ def clean_text(text: str = None) -> str:
 
     text = html.unescape(text)
 
-    text = text.lower()
-    text = re.sub(r"[^а-яА-Я\-]+", " ", text)  # leave the Cyrillic alphabet
-    # remove the single characters
-    text = re.sub(r"(?<!\S).(?!\S)\s*", "", text)
-    text = re.sub(r"\s+", " ", text).strip()  # remove the long blanks
+    text = re.sub(r"https?:\/\/.*[\r\n]*", "", text)  # remove urls
+    text = re.sub(r"\S+@\S+", "", text)  # remove emails
+    text = re.sub(r"ё", "е", text)
+    text = re.sub(r"\!|\"|\:|\;|\.|\,|[<>]|\?|\@|\[|\]|\^|\_|\`|[{}]|\~|[—–-]|[«»]|[()]", " ", text)  # remove punctuation
+    text = re.sub(r"\s+", " ", text)  # remove the long blanks
+
+    text = text.strip()
 
     if len(text) < 3:
         return "TOREMOVE"
@@ -58,32 +56,23 @@ def clean_text(text: str = None) -> str:
 @lru_cache()
 def get_morph4token(token: str = None) -> str:
     """
-    get lemma for one tokens with lru_cache
-
-    Parameters
-    ----------
-    token : string
-        input word (e.x. from list tokens)
-    Returns
-    -------
-    word_lem : string
-        lemmatized text
+    get lemma for one tokens with decorator `@lru_cache`
     """
 
     return morph.parse(token)[0].normal_form
 
 
-def lemmatize(text: str = None) -> str:
+def lemmatize(text: str = None, char4split: str = " ") -> str:
     """
-    lemmatization text with cache
-
-    Parameters
+    lemmatizations text with cache
+    parameters
     ----------
     input_text : string
         cleaned text
-    Returns
+    char4split : string (default = " ")
+        char-symbol how to split text
+    returns
     -------
-    words_lem : string
         lemmatized text
     """
 
@@ -94,12 +83,9 @@ def lemmatize(text: str = None) -> str:
 
     # get tokens from input text
     # in this case it's normal approach because we hard cleaned text
-    list_tokens = text.split(" ")
+    list_tokens = text.split(char4split)
 
-    words_lem = [
-        get_morph4token(token) for token in list_tokens
-        if token not in stopwords
-    ]
+    words_lem = [get_morph4token(token) for token in list_tokens if token not in stopwords]
 
     if len(words_lem) < 3:
         return "TOREMOVE"
