@@ -109,6 +109,8 @@ class TopicModelWrapperARTM:
         self.model.save(path)
 
     def load_model(self, path):
+        if self.model is None:
+            self.init_model()
         self.model.load(path)
 
     def transform(self):
