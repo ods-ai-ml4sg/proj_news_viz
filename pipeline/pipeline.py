@@ -10,15 +10,19 @@ import topic_model
 
 # TODO: set default paths
 # TODO: add docstrings
-# TODO: rename all tasks to *Task
 
 
 class PreprocessorTask(luigi.Task):
-    input_path = luigi.Parameter("./data/raw/")
-    output_path = luigi.Parameter()
+    # input_path = luigi.Parameter("./data/raw/")
+    # output_path = luigi.Parameter()
+    conf = luigi.Parameter()
 
     def __init__(self, *args, **kwargs):
         super(PreprocessorTask, self).__init__(*args, **kwargs)
+        self.config = configparser.ConfigParser()
+        self.config.read(self.conf)
+        self.input_path = self.config['common']['raw_path']
+        self.output_path = self.config['preprocessor']['output_path']
         # TODO: check if is file
         self.fnames = os.listdir(self.input_path)
 
@@ -42,18 +46,26 @@ class PreprocessorTask(luigi.Task):
 
 
 class RubricClassifierTask(luigi.Task):
-    input_path = luigi.Parameter()
-    output_path = luigi.Parameter()
-    classifier_path = luigi.Parameter()
-    ftransformer_path = luigi.Parameter()
+    # input_path = luigi.Parameter()
+    # output_path = luigi.Parameter()
+    # classifier_path = luigi.Parameter()
+    # ftransformer_path = luigi.Parameter()
+    conf = luigi.Parameter()
 
     def __init__(self, *args, **kwargs):
         super(RubricClassifierTask, self).__init__(*args, **kwargs)
+        self.config = configparser.ConfigParser()
+        self.config.read(self.conf)
+        self.input_path = self.config['preprocessor']['output_path']
+        self.output_path = self.config['classifier']['output_path']
+        self.classifier_path = self.config['classifier']['classifier_path']
+        self.ftransformer_path = self.config['classifier']['ftransformer_path']
+
         # TODO: check if is file
         self.fnames = os.listdir(self.input_path)
 
     def requires(self):
-        return PreprocessorTask(output_path=self.input_path)
+        return PreprocessorTask(conf=self.conf)
 
     def run(self):
         # TODO: add class to classname mapping
@@ -81,24 +93,28 @@ class RubricClassifierTask(luigi.Task):
 
 class TopicPredictorTask(luigi.Task):
     # --input_path_c= --input_path_l= --output_path= --model_path=
-    input_path_c = luigi.Parameter()
-    input_path_l = luigi.Parameter()
-    output_path = luigi.Parameter()
-    model_path = luigi.Parameter() # /path/to/model{1.bin}
-    
-    # TODO: add config {class: n_topics}
+    # input_path_c = luigi.Parameter()
+    # input_path_l = luigi.Parameter()
+    # output_path = luigi.Parameter()
+    # model_path = luigi.Parameter() # /path/to/model{1.bin}
+    conf = luigi.Parameter()
     
 
     def __init__(self, *args, **kwargs):
         super(TopicPredictorTask, self).__init__(*args, **kwargs)
+        self.config = configparser.ConfigParser()
+        self.config.read(self.conf)
+        self.input_path_c = self.config['classifier']['output_path']
+        self.input_path_l = self.config['preprocessor']['output_path']
+        self.output_path = self.config['topic']['output_path']
+        self.model_path = self.config['topic']['model_path']
+        self.dict_path = self.config['topic']['dict_path']
+
         # TODO: check if is file
         self.fnames = os.listdir(self.input_path_c)
 
     def requires(self):
-        return RubricClassifierTask(output_path=self.input_path_c,
-                 input_path=self.input_path_l,
-                  classifier_path="/run/media/sv9t/TOSHIBA EXT/proj_news_viz/pipeline/models/sport_gazeta.bin",
-                  ftransformer_path="/run/media/sv9t/TOSHIBA EXT/proj_news_viz/pipeline/models/sport_gazeta_tfidf.bin")
+        return RubricClassifierTask(conf=self.conf)
 
     def run(self):
         for fname in self.fnames:
@@ -109,15 +125,11 @@ class TopicPredictorTask(luigi.Task):
             classes = data_c["rubric_preds"].unique()
             source_name = fname.split(".")[0]
             for cl in classes:
-                # model = joblib.load()
-                # os.path.join(self.model_path, str(cl) + ".bin")
                 tm = topic_model.TopicModelWrapperARTM(self.output_path, source_name)
                 mask = data_c["rubric_preds"] == cl
                 writepath = os.path.join(self.output_path, source_name + str(cl) + ".csv.gz")
+                tm.load_model(self.model_path + str(cl) + ".bin", self.dict_path)
                 tm.prepare_data(data_l[mask]["lemmatized"].values)
-                tm.load_model(self.model_path + str(cl) + ".bin")
-                # model.apply_model(df=data[mask], n_topics=self.n_topics)
-                # preds = model.predict()
                 theta = tm.transform()
                 result = theta.merge(
                     data_c[mask].copy().reset_index()[["date"]],

@@ -13,6 +13,7 @@ class TopicModelWrapperARTM:
         self.vwpath = f"{dir_path}/vwpath/{name_dataset}_input_bigartm.vw"
         self.model = None
         self.n_topics = n_topics
+        self.dictionary_path = None
 
     # data, n_topics = 50
     def prepare_data(self, data):
@@ -31,24 +32,30 @@ class TopicModelWrapperARTM:
         self.batches_path = f"{self.dir_path}/batches/{self.name_dataset}"
 
         if not os.path.exists(self.batches_path):
-            print("create folder...\n")
+            print("creating batches path...\n")
             os.makedirs(self.batches_path)
 
         self.batch_vectorizer = artm.BatchVectorizer(
             data_path=self.vwpath,
             data_format="vowpal_wabbit",
             target_folder=self.batches_path,
+            gather_dictionary=False
         )
 
         if not os.path.exists(f"{self.dir_path}/dicts/"):
-            print("create folder...\n")
+            print("creating dicts path...\n")
+            print(f"{self.dir_path}/dicts/")
             os.makedirs(f"{self.dir_path}/dicts/")
 
-    def init_model(self):
+    def init_model(self, dictionary_path=None):
         dictionary = artm.Dictionary()
-        dictionary.gather(data_path=self.batches_path)
-        dictionary.filter(min_tf=10, max_df_rate=0.1)
-        dictionary.save_text(f"{self.dir_path}/dicts/dict_{self.name_dataset}.txt")
+        if dictionary_path is None:
+            dictionary.gather(data_path=self.batches_path)
+            dictionary.filter(min_tf=10, max_df_rate=0.1)
+            dictionary.save_text(f"{self.dir_path}/dicts/dict_{self.name_dataset}.txt")
+        else:
+            dictionary.load_text(dictionary_path)
+        # self.dictionary = dictionary
 
         self.model = artm.ARTM(
             num_topics=self.n_topics, dictionary=dictionary, show_progress_bars=True
@@ -108,13 +115,16 @@ class TopicModelWrapperARTM:
     def save_model(self, path):
         self.model.save(path)
 
-    def load_model(self, path):
+    def load_model(self, path, dictionary_path):
         if self.model is None:
-            self.init_model()
+            self.init_model(dictionary_path)
+        self.dictionary_path = dictionary_path
         self.model.load(path)
 
     def transform(self):
         assert not (self.model is None), "init and fit (or load) model first"
+        # if not (self.dictionary_path is None):
+            # self.batch_vectorizer.dictionary = self.dictionary
         theta = self.model.transform(batch_vectorizer=self.batch_vectorizer)
         theta = theta.T
         return theta
