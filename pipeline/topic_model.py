@@ -1,7 +1,8 @@
+import os
+
+import artm
 import numpy as np
 import pandas as pd
-import artm
-import os
 
 
 class TopicModelWrapperARTM:

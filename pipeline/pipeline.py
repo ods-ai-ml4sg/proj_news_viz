@@ -1,12 +1,13 @@
-import luigi
 import configparser
-import sys
-import os
 import logging
-import pandas as pd
-from preprocessing_tools import clean_text, lemmatize
+import os
+import sys
+
 import joblib
+import luigi
+import pandas as pd
 import topic_model
+from preprocessing_tools import clean_text, lemmatize
 
 # TODO: set default paths
 # TODO: add docstrings
