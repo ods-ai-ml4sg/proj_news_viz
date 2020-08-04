@@ -1,7 +1,8 @@
+import os
+
+import artm
 import numpy as np
 import pandas as pd
-import artm
-import os
 
 
 class TopicModelWrapperARTM:
@@ -39,7 +40,7 @@ class TopicModelWrapperARTM:
             data_path=self.vwpath,
             data_format="vowpal_wabbit",
             target_folder=self.batches_path,
-            gather_dictionary=False
+            gather_dictionary=False,
         )
 
         if not os.path.exists(f"{self.dir_path}/dicts/"):
@@ -52,41 +53,40 @@ class TopicModelWrapperARTM:
         if dictionary_path is None:
             dictionary.gather(data_path=self.batches_path)
             dictionary.filter(min_tf=10, max_df_rate=0.1)
-            dictionary.save_text(f"{self.dir_path}/dicts/dict_{self.name_dataset}.txt")
+            dictionary.save_text(
+                f"{self.dir_path}/dicts/dict_{self.name_dataset}.txt")
         else:
             dictionary.load_text(dictionary_path)
         # self.dictionary = dictionary
 
-        self.model = artm.ARTM(
-            num_topics=self.n_topics, dictionary=dictionary, show_progress_bars=True
-        )
+        self.model = artm.ARTM(num_topics=self.n_topics,
+                               dictionary=dictionary,
+                               show_progress_bars=True)
 
         # scores
         self.model.scores.add(
-            artm.PerplexityScore(name="PerplexityScore", dictionary=dictionary)
-        )
-        self.model.scores.add(artm.SparsityThetaScore(name="SparsityThetaScore"))
+            artm.PerplexityScore(name="PerplexityScore",
+                                 dictionary=dictionary))
+        self.model.scores.add(
+            artm.SparsityThetaScore(name="SparsityThetaScore"))
         self.model.scores.add(artm.SparsityPhiScore(name="SparsityPhiScore"))
 
         # regularizers
         self.model.regularizers.add(
-            artm.SmoothSparsePhiRegularizer(name="SparsePhi", tau=-0.1)
-        )
+            artm.SmoothSparsePhiRegularizer(name="SparsePhi", tau=-0.1))
         self.model.regularizers.add(
-            artm.SmoothSparseThetaRegularizer(name="SparseTheta", tau=-0.5)
-        )
+            artm.SmoothSparseThetaRegularizer(name="SparseTheta", tau=-0.5))
         self.model.regularizers.add(
-            artm.DecorrelatorPhiRegularizer(name="DecorrelatorPhi", tau=1.5e5)
-        )
+            artm.DecorrelatorPhiRegularizer(name="DecorrelatorPhi", tau=1.5e5))
 
     def fit(self):
         if self.model is None:
             self.init_model()
-        self.model.fit_offline(
-            batch_vectorizer=self.batch_vectorizer, num_collection_passes=50
-        )
+        self.model.fit_offline(batch_vectorizer=self.batch_vectorizer,
+                               num_collection_passes=50)
 
-        sparsityTheta = self.model.score_tracker["SparsityThetaScore"].last_value
+        sparsityTheta = self.model.score_tracker[
+            "SparsityThetaScore"].last_value
         sparsityPhi = self.model.score_tracker["SparsityPhiScore"].last_value
         perpl = self.model.score_tracker["PerplexityScore"].last_value
 
@@ -104,11 +104,9 @@ class TopicModelWrapperARTM:
         phi = self.get_phi()
         for topic in phi.columns:
             print(topic)
-            top_words = (
-                phi.sort_values(by=topic, ascending=False)["word"]
-                .apply(lambda x: x[1])
-                .values[:20]
-            )
+            top_words = (phi.sort_values(
+                by=topic,
+                ascending=False)["word"].apply(lambda x: x[1]).values[:20])
             print(top_words)
             print("==" * 5)
 
@@ -124,7 +122,7 @@ class TopicModelWrapperARTM:
     def transform(self):
         assert not (self.model is None), "init and fit (or load) model first"
         # if not (self.dictionary_path is None):
-            # self.batch_vectorizer.dictionary = self.dictionary
+        # self.batch_vectorizer.dictionary = self.dictionary
         theta = self.model.transform(batch_vectorizer=self.batch_vectorizer)
         theta = theta.T
         return theta
