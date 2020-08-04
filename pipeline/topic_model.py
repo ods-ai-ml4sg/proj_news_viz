@@ -39,7 +39,7 @@ class TopicModelWrapperARTM:
             data_path=self.vwpath,
             data_format="vowpal_wabbit",
             target_folder=self.batches_path,
-            gather_dictionary=False
+            gather_dictionary=False,
         )
 
         if not os.path.exists(f"{self.dir_path}/dicts/"):
@@ -52,8 +52,7 @@ class TopicModelWrapperARTM:
         if dictionary_path is None:
             dictionary.gather(data_path=self.batches_path)
             dictionary.filter(min_tf=10, max_df_rate=0.1)
-            dictionary.save_text(
-                f"{self.dir_path}/dicts/dict_{self.name_dataset}.txt")
+            dictionary.save_text(f"{self.dir_path}/dicts/dict_{self.name_dataset}.txt")
         else:
             dictionary.load_text(dictionary_path)
         # self.dictionary = dictionary
@@ -66,8 +65,7 @@ class TopicModelWrapperARTM:
         self.model.scores.add(
             artm.PerplexityScore(name="PerplexityScore", dictionary=dictionary)
         )
-        self.model.scores.add(
-            artm.SparsityThetaScore(name="SparsityThetaScore"))
+        self.model.scores.add(artm.SparsityThetaScore(name="SparsityThetaScore"))
         self.model.scores.add(artm.SparsityPhiScore(name="SparsityPhiScore"))
 
         # regularizers
