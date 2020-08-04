@@ -137,6 +137,10 @@ nlp/notebooks/topic_models/separateTopics/compare/data/interfax/vwpath/*
 nlp/notebooks/topic_models/separateTopics/compare/data/interfax/batches/*
 
 !nlp/topic_models/separateTopics/lenta/data/topicsProbability/*
-
 # disable ignore
 !README.*
+
+# database connect
+db.ini
+
+.idea/

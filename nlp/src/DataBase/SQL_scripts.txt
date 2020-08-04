@@ -1,0 +1,9 @@
+INSERT INTO raw_data.raw_data(
+	id_raw_data, id_news_source, date, url, edition, topics, authors, title, text, reposts_fb, reposts_vk, reposts_ok, reposts_twi, reposts_lj, reposts_tg, likes, views, comm_count, created_date, modified_date, batch_date)
+	(SELECT uuid_generate_v4(), 'f5acfc5a-ffcd-4f68-90d5-d5b2203f50d3', date, url, edition, topics, authors, title, text, reposts_fb, reposts_vk, reposts_ok, reposts_twi, reposts_lj, reposts_tg, likes, views, comm_count, '2019-12-04 23:33:14', '2019-12-04 23:33:14', '1900-01-01 00:00:00'
+	FROM public.interfax);
+
+INSERT INTO raw_data.raw_data(
+	id_raw_data, id_news_source, date, url, edition, topics, authors, title, text, reposts_fb, reposts_vk, reposts_ok, reposts_twi, reposts_lj, reposts_tg, likes, views, comm_count, created_date, modified_date, batch_date)
+	(SELECT uuid_generate_v4(), '4de38970-028a-49b3-be6a-d1023961b0f5', date, url, edition, topics, authors, title, text, reposts_fb, reposts_vk, reposts_ok, reposts_twi, reposts_lj, reposts_tg, likes, views, comm_count, '2019-12-04 23:33:14', '2019-12-04 23:33:14', '1900-01-01 00:00:00'
+	FROM public.gazeta);

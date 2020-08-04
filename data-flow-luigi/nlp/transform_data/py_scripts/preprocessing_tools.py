@@ -1,19 +1,15 @@
+from functools import lru_cache
+
 import html
 import re
-import sys
-from functools import lru_cache
-from pathlib import Path
 
-import pymorphy2
-
-PATH = Path("../..")
-sys.path.append(str(PATH))
+import pymorphy2  # pip install pymorphy2
 
 morph = pymorphy2.MorphAnalyzer()
 
 # read stopwords for RU
 try:
-    with open(PATH / "data/features/stopwords_ru.txt", "r") as file:
+    with open('../../../nlp/data/features/stopwords_ru.txt', "r") as file:
         stopwords = file.read().splitlines()
 except FileNotFoundError:
     stopwords = []
@@ -23,35 +19,29 @@ cache = {}
 
 
 def clean_text(text: str = None) -> str:
-    """
+    '''
     clean text, leaving only tokens for clustering
 
     Parameters
     ----------
-        text : string
-            input text
+    text : string
+        input text
 
     Returns
     -------
-        text : string
-            cleaned string text
-    """
+    text : string
+        cleaned string text
+    '''
 
     if not isinstance(text, str):
         text = str(text)
 
-    text = html.unescape(text)
-
     text = text.lower()
-    text = re.sub(r"[^а-яА-Я\-]+", " ", text)  # leave the Cyrillic alphabet
-    # remove the single characters
-    text = re.sub(r"(?<!\S).(?!\S)\s*", "", text)
-    text = re.sub(r"\s+", " ", text).strip()  # remove the long blanks
+    text = re.sub(r'[^а-яА-Я\-]+', ' ', text)  # leave the Cyrillic alphabet
+    text = re.sub(r'(?<!\S).(?!\S)\s*', '', text)  # remove the single characters
+    text = re.sub(r'\s+', ' ', text).strip()  # remove the long blanks
 
-    if len(text) < 3:
-        return "TOREMOVE"
-    else:
-        return text
+    return text
 
 
 @lru_cache()
@@ -93,14 +83,8 @@ def lemmatize(text: str = None) -> str:
 
     # get tokens from input text
     # in this case it's normal approach because we hard cleaned text
-    list_tokens = text.split(" ")
+    list_tokens = text.split(' ')
 
-    words_lem = [
-        get_morph4token(token) for token in list_tokens
-        if token not in stopwords
-    ]
+    words_lem = [get_morph4token(token) for token in list_tokens if token not in stopwords]
 
-    if len(words_lem) < 3:
-        return "TOREMOVE"
-    else:
-        return " ".join(words_lem)
+    return words_lem
