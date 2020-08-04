@@ -98,7 +98,6 @@ class TopicPredictorTask(luigi.Task):
     # output_path = luigi.Parameter()
     # model_path = luigi.Parameter() # /path/to/model{1.bin}
     conf = luigi.Parameter()
-    
 
     def __init__(self, *args, **kwargs):
         super(TopicPredictorTask, self).__init__(*args, **kwargs)
@@ -125,10 +124,13 @@ class TopicPredictorTask(luigi.Task):
             classes = data_c["rubric_preds"].unique()
             source_name = fname.split(".")[0]
             for cl in classes:
-                tm = topic_model.TopicModelWrapperARTM(self.output_path, source_name)
+                tm = topic_model.TopicModelWrapperARTM(
+                    self.output_path, source_name)
                 mask = data_c["rubric_preds"] == cl
-                writepath = os.path.join(self.output_path, source_name + str(cl) + ".csv.gz")
-                tm.load_model(self.model_path + str(cl) + ".bin", self.dict_path)
+                writepath = os.path.join(
+                    self.output_path, source_name + str(cl) + ".csv.gz")
+                tm.load_model(self.model_path + str(cl) +
+                              ".bin", self.dict_path)
                 tm.prepare_data(data_l[mask]["lemmatized"].values)
                 theta = tm.transform()
                 result = theta.merge(
@@ -147,7 +149,8 @@ class TopicPredictorTask(luigi.Task):
             classes = data_c["rubric_preds"].unique()
             for cl in classes:
                 source_name = fname.split(".")[0]
-                writepath = os.path.join(self.output_path, source_name + str(cl) + ".csv.gz")
+                writepath = os.path.join(
+                    self.output_path, source_name + str(cl) + ".csv.gz")
                 outputs.append(luigi.LocalTarget(writepath))
         return outputs
 
