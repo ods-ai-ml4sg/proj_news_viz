@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 
 
-def plotFrequencyWords(
-    vocab: list = None, top_words: int = 30, plt_background: str = None
-) -> None:
+def plotFrequencyWords(vocab: list = None,
+                       top_words: int = 30,
+                       plt_background: str = None) -> None:
     """
     plot token frequency
     Parameters
@@ -26,7 +26,7 @@ def plotFrequencyWords(
         x.append(key)
         y.append(val)
 
-    plt.figure(figsize=(20, 10),)
+    plt.figure(figsize=(20, 10), )
     plt.bar(x, y)
     plt.title(f"топ-{top_words} частотных слов")
     plt.xlabel("слова", horizontalalignment="center")
