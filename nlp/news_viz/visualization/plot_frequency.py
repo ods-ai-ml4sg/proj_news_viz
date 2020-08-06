@@ -1,14 +1,18 @@
+from typing import List, Optional, Tuple
+
 import matplotlib.pyplot as plt
 
+Vocab = List[Tuple[str, float]]
 
-def plotFrequencyWords(vocab: list = None,
+
+def plotFrequencyWords(vocab: Vocab,
                        top_words: int = 30,
-                       plt_background: str = None) -> None:
+                       plt_background: Optional[str] = None) -> None:
     """
     plot token frequency
-    Parameters
+    parameters
     ----------
-        vocab: list (defauld = None)
+        vocab: Vocab
             list tuples words with them frequency
             like `[('на', 1330966), ... ]`
         top_words: int (defauld = 30)
