@@ -2,5 +2,5 @@
 
 ## Запуск процесса обработки данных
 ```python
->>> python preprocess.py UpdateBatchDate --local-scheduler
+>>> python data_flow.py UpdateBatchDate --local-scheduler
 ```
