@@ -15,6 +15,7 @@ def plotFrequencyWords(vocab: list = None,
             enter top words to plot
         plt_background : str {'dark'} (default = None)
             background stale for matplotlib.pyplot.plt
+
     """
 
     if plt_background == "dark":
