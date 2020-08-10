@@ -127,14 +127,12 @@ class TopicPredictorTask(luigi.Task):
             classes = data_c["rubric_preds"].unique()
             source_name = fname.split(".")[0]
             for cl in classes:
-                tm = topic_model.TopicModelWrapperARTM(
-                    self.output_path, source_name)
+                tm = topic_model.TopicModelWrapperARTM(self.output_path, source_name)
                 mask = data_c["rubric_preds"] == cl
                 writepath = os.path.join(
                     self.output_path, source_name + str(cl) + ".csv.gz"
                 )
-                tm.load_model(self.model_path + str(cl) +
-                              ".bin", self.dict_path)
+                tm.load_model(self.model_path + str(cl) + ".bin", self.dict_path)
                 tm.prepare_data(data_l[mask]["lemmatized"].values)
                 theta = tm.transform()
                 result = theta.merge(
