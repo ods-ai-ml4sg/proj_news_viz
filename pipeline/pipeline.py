@@ -97,6 +97,7 @@ class TopicPredictorTask(luigi.Task):
     """ depends on previous step
         requires pretrained topic models for each class
     """
+
     # TODO: save top words
     conf = luigi.Parameter()
 
