@@ -7,8 +7,7 @@ import joblib
 import luigi
 import pandas as pd
 import topic_model
-from preprocessing_tools import clean_text
-from preprocessing_tools import lemmatize
+from preprocessing_tools import clean_text, lemmatize
 
 
 class PreprocessorTask(luigi.Task):
