@@ -1,10 +1,11 @@
+import json
 import os
+from pathlib import Path
+
+import colorlover as cl
 import numpy as np
 import pandas as pd
-from pathlib import Path
-import colorlover as cl
 import plotly.graph_objs as go
-import json
 
 colors = cl.to_rgb(cl.interp(cl.scales["12"]["qual"]["Paired"], 20))
 add_colors = cl.to_rgb(cl.scales["7"]["qual"]["Set1"])

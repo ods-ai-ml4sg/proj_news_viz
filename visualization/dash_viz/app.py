@@ -1,20 +1,18 @@
 # -*- coding: utf-8 -*-
+# from pathlib import PurePosixPath, Path
+import collections
 import json
 from textwrap import dedent as d
 
-# from pathlib import PurePosixPath, Path
-import collections
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output, State
-import pandas as pd
 import numpy as np
-from plotly import tools
-import plotly.graph_objs as go
+import pandas as pd
 import plotly.figure_factory as ff
-
-
+import plotly.graph_objs as go
+from dash.dependencies import Input, Output, State
+from plotly import tools
 from utils import *
 
 # TODO: Add top words
