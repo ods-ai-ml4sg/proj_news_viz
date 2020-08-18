@@ -10,13 +10,12 @@ import topic_model
 from preprocessing_tools import clean_text
 from preprocessing_tools import lemmatize
 
-# TODO: set default paths
-# TODO: add docstrings
-
 
 class PreprocessorTask(luigi.Task):
-    # input_path = luigi.Parameter("./data/raw/")
-    # output_path = luigi.Parameter()
+    """ expects directory with csv files in it
+    files must contain columns: text, topics, date
+    """
+
     conf = luigi.Parameter()
 
     def __init__(self, *args, **kwargs):
@@ -48,10 +47,11 @@ class PreprocessorTask(luigi.Task):
 
 
 class RubricClassifierTask(luigi.Task):
-    # input_path = luigi.Parameter()
-    # output_path = luigi.Parameter()
-    # classifier_path = luigi.Parameter()
-    # ftransformer_path = luigi.Parameter()
+    """ depends on previous step
+        and requires pretrained classifier with method predict()
+        and features extractor with method transform()
+    """
+
     conf = luigi.Parameter()
 
     def __init__(self, *args, **kwargs):
@@ -94,11 +94,11 @@ class RubricClassifierTask(luigi.Task):
 
 
 class TopicPredictorTask(luigi.Task):
-    # --input_path_c= --input_path_l= --output_path= --model_path=
-    # input_path_c = luigi.Parameter()
-    # input_path_l = luigi.Parameter()
-    # output_path = luigi.Parameter()
-    # model_path = luigi.Parameter() # /path/to/model{1.bin}
+    """ depends on previous step
+        requires pretrained topic models for each class
+    """
+
+    # TODO: save top words
     conf = luigi.Parameter()
 
     def __init__(self, *args, **kwargs):
@@ -109,6 +109,7 @@ class TopicPredictorTask(luigi.Task):
         self.input_path_l = self.config["preprocessor"]["output_path"]
         self.output_path = self.config["topic"]["output_path"]
         self.model_path = self.config["topic"]["model_path"]
+        # TODO: move model params to the model wrapper script
         self.dict_path = self.config["topic"]["dict_path"]
 
         # TODO: check if is file
@@ -155,6 +156,3 @@ class TopicPredictorTask(luigi.Task):
                                          source_name + str(cl) + ".csv.gz")
                 outputs.append(luigi.LocalTarget(writepath))
         return outputs
-
-
-# TODO Pass raw path as input for all task then compute dependency path

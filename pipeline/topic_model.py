@@ -7,9 +7,12 @@ import pandas as pd
 
 class TopicModelWrapperARTM:
     def __init__(self, dir_path, name_dataset, n_topics=50):
-        # '/home/sv9t/repas/proj_news_viz/pipeline/data/artm/'
+        """ dir_path: path to directory where all outputs
+                and temporary files should be stored
+            name_dataset: used to generate paths and file names
+            n_topics: number of topics in topic model
+        """
         self.dir_path = dir_path
-        # 'gazeta'
         self.name_dataset = name_dataset
         self.vwpath = f"{dir_path}/vwpath/{name_dataset}_input_bigartm.vw"
         self.model = None
@@ -49,6 +52,8 @@ class TopicModelWrapperARTM:
             os.makedirs(f"{self.dir_path}/dicts/")
 
     def init_model(self, dictionary_path=None):
+        """ dictionary_path: optional, used with pretrained model
+        """
         dictionary = artm.Dictionary()
         if dictionary_path is None:
             dictionary.gather(data_path=self.batches_path)
@@ -57,7 +62,6 @@ class TopicModelWrapperARTM:
                 f"{self.dir_path}/dicts/dict_{self.name_dataset}.txt")
         else:
             dictionary.load_text(dictionary_path)
-        # self.dictionary = dictionary
 
         self.model = artm.ARTM(num_topics=self.n_topics,
                                dictionary=dictionary,
@@ -111,18 +115,37 @@ class TopicModelWrapperARTM:
             print("==" * 5)
 
     def save_model(self, path):
+        """ path: path to save model"""
+        # TODO: save dictionary near model
         self.model.save(path)
 
     def load_model(self, path, dictionary_path):
+        """ path: path to model binary saved with 'save_model'
+            dictionary_path: path to dictionary for this model
+        """
+        # TODO: make dictionary path from model path
         if self.model is None:
             self.init_model(dictionary_path)
         self.dictionary_path = dictionary_path
         self.model.load(path)
 
     def transform(self):
-        assert not (self.model is None), "init and fit (or load) model first"
-        # if not (self.dictionary_path is None):
-        # self.batch_vectorizer.dictionary = self.dictionary
+        if self.model is None:
+            raise Exception("init and fit (or load) model first")
         theta = self.model.transform(batch_vectorizer=self.batch_vectorizer)
         theta = theta.T
         return theta
+
+    def save_top_words(self, path, top=20):
+        """ path: where to save top words
+            top: number top words to save
+        """
+        phi = self.get_phi()
+        top_words_dict = dict()
+        for topic in phi.columns:
+            top_words = (phi.sort_values(
+                by=topic,
+                ascending=False)["word"].apply(lambda x: x[1]).values[:top])
+            top_words_dict[topic] = list(top_words)
+
+        json.dump(top_words_dict, open(path, "w"))
