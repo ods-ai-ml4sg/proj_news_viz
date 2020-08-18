@@ -26,8 +26,8 @@ container = load_data(data_path)
 # source is defined by directory name
 # rubrics are defined by filenames in dir
 # topics are defined by columns' names
-k = list(container.keys())[0] # FE: 'ria'
-kk = list(container[k].keys())[0] # FE 'sport'
+k = list(container.keys())[0]  # FE: 'ria'
+kk = list(container[k].keys())[0]  # FE 'sport'
 # container = {'ria': {'topic_0: [1, 2, 3, 4], ...}, ...}
 
 top_words = load_top_words(container)
@@ -52,7 +52,8 @@ left_panel = html.Div(
                 ),
                 dcc.Dropdown(
                     id="source",
-                    options=[{"label": s, "value": s} for s in container.keys()],
+                    options=[{"label": s, "value": s}
+                             for s in container.keys()],
                     value=list(container.keys())[0],
                 ),
             ]
@@ -88,7 +89,8 @@ left_panel = html.Div(
                 dcc.Dropdown(
                     id="heading",
                     value=list(container[k].keys())[0],
-                    options=[{"label": s, "value": s} for s in container[k].keys()],
+                    options=[{"label": s, "value": s}
+                             for s in container[k].keys()],
                 ),
             ]
         ),
@@ -105,7 +107,8 @@ left_panel = html.Div(
                     id="topics",
                     multi=True,
                     value=["topic_0", "topic_1"],
-                    options=[{"label": s, "value": s} for s in container[k][kk][1]],
+                    options=[{"label": s, "value": s}
+                             for s in container[k][kk][1]],
                 ),
             ]
         ),
@@ -123,7 +126,8 @@ app.layout = html.Div(
     children=[
         html.H1(children="Visualization"),
         html.Div(children=[left_panel, fig_div]),
-        html.Div([html.H2(children="Топ слов по темам"), html.Div(id="top_words",)]),
+        html.Div([html.H2(children="Топ слов по темам"),
+                  html.Div(id="top_words",)]),
     ],
     className="twelve columns",
 )
@@ -139,7 +143,8 @@ def update_heading(source):
 
 
 @app.callback(
-    Output("topics", "options"), [Input("source", "value"), Input("heading", "value")]
+    Output("topics", "options"), [
+        Input("source", "value"), Input("heading", "value")]
 )
 def update_topics(source, heading):
 
@@ -150,7 +155,8 @@ def update_topics(source, heading):
 
 @app.callback(
     Output("top_words", "children"),
-    [Input("source", "value"), Input("heading", "value"), Input("topics", "value")],
+    [Input("source", "value"), Input(
+        "heading", "value"), Input("topics", "value")],
 )
 def update_top_words(source, heading, topics):
     result = []
