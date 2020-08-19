@@ -51,24 +51,24 @@ Python 3.6+
 ## Contributions
 В алфавитном порядке
 
- - @Alf162
- - @Avenon
- - @BoardGamer44
- - @Erlemar
- - @IlyaGusev
- - @LanSaid
- - @Midzay
- - @Teoretic6
- - @andreymalakhov
- - @aprotopopov
- - @buriy
- - @darkzenon
- - @iggisv9t
- - @m12sl
- - @marishadorosh
- - @monuvio
- - @orech
- - @p-kachalov
- - @vtrokhymenko  
+ - [@Alf162](https://github.com/Alf162)
+ - [@Avenon](https://github.com/Avenon)
+ - [@BoardGamer44](https://github.com/BoardGamer44)
+ - [@Erlemar](https://github.com/Erlemar)
+ - [@IlyaGusev](https://github.com/IlyaGusev)
+ - [@LanSaid](https://github.com/LanSaid)
+ - [@Midzay](https://github.com/Midzay)
+ - [@Teoretic6](https://github.com/Teoretic6)
+ - [@andreymalakhov](https://github.com/andreymalakhov)
+ - [@aprotopopov](https://github.com/aprotopopov)
+ - [@buriy](https://github.com/buriy)
+ - [@darkzenon](https://github.com/darkzenon)
+ - [@iggisv9t](https://github.com/iggisv9t)
+ - [@m12sl](https://github.com/m12sl)
+ - [@marishadorosh](https://github.com/marishadorosh)
+ - [@monuvio](https://github.com/monuvio)
+ - [@orech](https://github.com/orech)
+ - [@p-kachalov](https://github.com/p-kachalov)
+ - [@vtrokhymenko](https://github.com/vtrokhymenko)
  
 Здесь могло быть ваше имя.
