@@ -4,11 +4,14 @@
 ### Ответы на все вопросы первым делом искать тут:  
 https://github.com/ods-ai-ml4sg/proj_news_viz/wiki
 
+Тут документация по основному коду https://github.com/ods-ai-ml4sg/proj_news_viz/wiki/Pipeline-инструкция-по-применению
+
 ## Структура репозитория  
 
 ```bash
 .
 ├── README.md
+├── pipeline           # текущая рабочая версия пайплайная, то есть основной код
 ├── visualization      # всячина связанная с визуализацией
 ├── scraping           # скрипты для скрапинга
 ├── nlp                # всё, что связано с nlp в проекте
@@ -28,25 +31,44 @@ https://github.com/ods-ai-ml4sg/proj_news_viz/wiki
 
 Python 3.6+
 
-## Порядок работы
+## Contributing
 
-1. Клонируем себе реп
-2. Заводим ветку, кодим-проверяем-коммитим
+1. Сначала обсудите предлагаемые изменения в issues
+2. Заводим ветку, в названии ветки лучше добавить свой ник, чтобы вас было легко найти, кодим-проверяем-коммитим
 3. Создаем пулл-реквест
 
 ## Соглашения
 
 1. Не стесняйтесь писать комменты на русском языке.
 2. Пишите содержательные сообщения к коммитам.
-3. Используйте flake8 (`flake8 .`) для проверки кода на стиль.
+3. Используйте black (https://github.com/psf/black) для автоматического форматирования кода.
 
+## Чем вы можете помочь
+1. Посмотрите issues -- там должны быть расписаны актуальные задачи
+2. Помогите нам дополнить документацию и помочь другим разобраться в проекте
+2. Если ничего не понятно -- задайте вопросы, это приветствуется
 
 ## Contributions
+В алфавитном порядке
 
-- Andrey @Erlemar
-- Vladimir @LanSaid
-- Pavel @p-kachalov
-- Andrey Malakhov @andreymalakhov
-- Yuri Baburov @buriy
-- Sviatoslav @iggisv9t  
+ - @Alf162
+ - @Avenon
+ - @BoardGamer44
+ - @Erlemar
+ - @IlyaGusev
+ - @LanSaid
+ - @Midzay
+ - @Teoretic6
+ - @andreymalakhov
+ - @aprotopopov
+ - @buriy
+ - @darkzenon
+ - @iggisv9t
+ - @m12sl
+ - @marishadorosh
+ - @monuvio
+ - @orech
+ - @p-kachalov
+ - @vtrokhymenko  
+ 
 Здесь могло быть ваше имя.
