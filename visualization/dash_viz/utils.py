@@ -1,10 +1,11 @@
+import json
 import os
+from pathlib import Path
+
+import colorlover as cl
 import numpy as np
 import pandas as pd
-from pathlib import Path
-import colorlover as cl
 import plotly.graph_objs as go
-import json
 
 colors = cl.to_rgb(cl.interp(cl.scales["12"]["qual"]["Paired"], 20))
 add_colors = cl.to_rgb(cl.scales["7"]["qual"]["Set1"])
@@ -24,7 +25,8 @@ def load_data(path):
         rubric_files = os.listdir(os.path.join(path, source))
         for fname in rubric_files:
             print(os.path.join(path, source, fname))
-            data = pd.read_csv(os.path.join(path, source, fname), compression="gzip")
+            data = pd.read_csv(os.path.join(path, source, fname),
+                               compression="gzip")
             data, topics = preprocess_data(data)
             container[source][fname.split(".")[0]] = (data, topics)
 
@@ -32,7 +34,9 @@ def load_data(path):
 
 
 def preprocess_data(df):
-    df["date"] = ["{}-{:02d}-01".format(a, b) for a, b in df[["year", "month"]].values]
+    df["date"] = [
+        "{}-{:02d}-01".format(a, b) for a, b in df[["year", "month"]].values
+    ]
     df = df.drop(columns=["year", "month"])
     topics = list(df.columns)
     topics.remove("date")
@@ -46,7 +50,7 @@ def load_top_words(container):
     top_words = dict()
     k = list(container.keys())[0]
     for kk in container[k].keys():
-        top_words[kk] = json.load(open('./data/tw_{}.json'.format(kk)))
+        top_words[kk] = json.load(open("./data/tw_{}.json".format(kk)))
     return top_words
 
 
@@ -124,7 +128,8 @@ def ridge_plot(df, topics):
     layout = go.Layout(
         height=height,
         xaxis=dict(
-            rangeslider=dict(range=[df["date"].min(), df["date"].max()], visible=True),
+            rangeslider=dict(range=[df["date"].min(), df["date"].max()],
+                             visible=True),
             type="date",
         ),
         yaxis=dict(
