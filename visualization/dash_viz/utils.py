@@ -17,6 +17,15 @@ add_colors = cl.to_rgb(cl.scales["7"]["qual"]["Set1"])
 
 
 def load_data(path):
+    """loads data into container
+    source -> rubrics -> topics data and topics names
+    result is dict like this: 
+    {'ria': {'sport: (pd.DataFrame(), [topic_1, topic_2]), ...}, ...}
+    {source: {rubric: (df with topic values, list of topic_names)
+    source is defined by directory name
+    rubrics are defined by filenames in dir
+    topics are defined by columns' names
+    """
     sources = os.listdir(path)
     # check, if only directories included
     sources = [s for s in sources if os.path.isdir(os.path.join(path, s))]
@@ -34,6 +43,10 @@ def load_data(path):
 
 
 def preprocess_data(df):
+    """makes date column from year and month
+    scales data by it's std and magic constant 50 
+    (scaled to offset in ridgeline plot)
+    """
     df["date"] = [
         "{}-{:02d}-01".format(a, b) for a, b in df[["year", "month"]].values
     ]
@@ -48,9 +61,10 @@ def preprocess_data(df):
 
 def load_top_words(container):
     top_words = dict()
-    k = list(container.keys())[0]
-    for kk in container[k].keys():
-        top_words[kk] = json.load(open("./data/tw_{}.json".format(kk)))
+    # pic first source, assuming all sources have same rubric list
+    source = list(container.keys())[0]
+    for rubric in container[source].keys():
+        top_words[rubric] = json.load(open("./data/tw_{}.json".format(rubric)))
     return top_words
 
 
@@ -92,11 +106,20 @@ def bump_chart(df, topics):
 #     return figure
 
 
-def ridge_plot(df, topics):
+def ridge_plot(df, topics, offset=100, add_offset=10):
+    """
+    df: pandas DataFrame with columns date (type: datetime) 
+        and columns listed in parameter topics (list of str),
+        each topic column of numerical type, float or int
+    topics: list of column names to draw
+    offset: shift between every single plot (multiplicative)
+    add_offset: additive shift
+    """
+    # data that will be passed to plotly
     data = list()
-    add_offset = 10
     for idx, topic in enumerate(topics):
-        offset = idx * 100 + add_offset
+        offset = idx * offset + add_offset
+        # filling under line
         tracex = go.Scatter(
             x=df.date.values,
             y=np.full(len(df[topic].values), offset),
@@ -109,6 +132,7 @@ def ridge_plot(df, topics):
             line=dict(color=colors[idx]),
             opacity=0.0,
         )
+        # line
         trace = go.Scatter(
             x=df.date.values,
             y=df[topic].values + offset,
@@ -124,6 +148,7 @@ def ridge_plot(df, topics):
         data.append(trace)
 
     count_of_plots = len(data)
+    # Please someone describe how this computed
     height = min(300 + (count_of_plots // 2 * 50), 900)
     layout = go.Layout(
         height=height,
