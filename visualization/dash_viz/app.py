@@ -54,7 +54,8 @@ left_panel = html.Div(
                 ),
                 dcc.Dropdown(
                     id="source",
-                    options=[{"label": s, "value": s} for s in container.keys()],
+                    options=[{"label": s, "value": s}
+                             for s in container.keys()],
                     value=list(container.keys())[0],
                 ),
             ]
@@ -137,7 +138,8 @@ app.layout = html.Div(
         # left panel and main plot
         html.Div(children=[left_panel, fig_div]),
         # Table with top words for chosen topics
-        html.Div([html.H2(children="Топ слов по темам"), html.Div(id="top_words",)]),
+        html.Div([html.H2(children="Топ слов по темам"),
+                  html.Div(id="top_words",)]),
     ],
     className="twelve columns",
 )
@@ -157,7 +159,8 @@ def update_rubric(source):
 
 
 @app.callback(
-    Output("topics", "options"), [Input("source", "value"), Input("rubric", "value")]
+    Output("topics", "options"), [
+        Input("source", "value"), Input("rubric", "value")]
 )
 def update_topics(source, rubric):
     """For given source and rubric
@@ -170,7 +173,8 @@ def update_topics(source, rubric):
 
 @app.callback(
     Output("top_words", "children"),
-    [Input("source", "value"), Input("rubric", "value"), Input("topics", "value")],
+    [Input("source", "value"), Input(
+        "rubric", "value"), Input("topics", "value")],
 )
 def update_top_words(source, rubric, topics):
     """returns table with top words 
