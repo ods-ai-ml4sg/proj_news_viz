@@ -1,4 +1,7 @@
-# proj_news_viz  
+
+![](https://storage.yandexcloud.net/datasouls-ods/cache/c2/b9/c2b9fd99fb273f2f569242ef62f4cd03.jpg)  
+
+Часть инициативы <img src="https://ods.ai/ods/logo/ml4sg.svg" width="30"> ML4SG от [ods.ai](https://ods.ai)
 
 ## Что здесь происходит
 Мы делаем инструмент для исследования развития со временем [тем в текстах](www.machinelearning.ru/wiki/index.php?title=Тематическое_моделирование). Основной целевой набор текстов -- русскоязычные новости, но методика и сам инструмент подходят для произвольного набора текстов.  
