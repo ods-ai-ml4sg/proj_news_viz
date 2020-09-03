@@ -11,9 +11,7 @@ import numpy as np
 import pandas as pd
 import plotly.figure_factory as ff
 import plotly.graph_objs as go
-from dash.dependencies import Input
-from dash.dependencies import Output
-from dash.dependencies import State
+from dash.dependencies import Input, Output, State
 from plotly import tools
 from utils import *
 
