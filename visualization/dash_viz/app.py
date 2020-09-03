@@ -25,9 +25,10 @@ container = load_data(data_path)
 # source is defined by directory name
 # rubrics are defined by filenames in dir
 # topics are defined by columns' names
-k = list(container.keys())[0]  # FE: 'ria'
-kk = list(container[k].keys())[0]  # FE 'sport'
-# container = {'ria': {'topic_0: [1, 2, 3, 4], ...}, ...}
+source0 = list(container.keys())[0]  # FE: 'ria'
+rubric0 = list(container[source0].keys())[0]  # FE 'sport'
+# container = {'ria': {'sport: (pd.DataFrame(), [topic_1, topic_2]), ...}, ...}
+# template: {source: {rubric: (df with topic values, list of topic_names)
 
 top_words = load_top_words(container)
 
@@ -37,12 +38,14 @@ external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
 
+# Panel with menu on the left of the page
 left_panel = html.Div(
     style={
         "width": "200px",
         "float": "left"
     },
     children=[
+        # Source choice
         html.Div([
             dcc.Markdown(
                 d("""
@@ -57,6 +60,7 @@ left_panel = html.Div(
                 value=list(container.keys())[0],
             ),
         ]),
+        # Chart type choice
         html.Div([
             dcc.Markdown(
                 d("""
@@ -77,20 +81,22 @@ left_panel = html.Div(
                 value="ridge",
             ),
         ]),
+        # Rubric choice
         html.Div([
             dcc.Markdown(
                 d("""
                     **Рубрики**
                 """)),
             dcc.Dropdown(
-                id="heading",
-                value=list(container[k].keys())[0],
+                id="rubric",
+                value=list(container[source0].keys())[0],
                 options=[{
                     "label": s,
                     "value": s
-                } for s in container[k].keys()],
+                } for s in container[source0].keys()],
             ),
         ]),
+        # Topic list choice
         html.Div([
             dcc.Markdown(
                 d("""
@@ -103,23 +109,28 @@ left_panel = html.Div(
                 options=[{
                     "label": s,
                     "value": s
-                } for s in container[k][kk][1]],
+                } for s in container[source0][rubric0][1]],
             ),
         ]),
     ],
     className="three columns",
 )
 
+# Block with main plot
 fig_div = html.Div(
     style={"margin-left": "200px"},
     children=[dcc.Graph(id="graph", figure=go.Figure())],
     className="nine columns",
 )
 
+# Here is layout of the whole page
 app.layout = html.Div(
     children=[
+        # Page heading
         html.H1(children="Visualization"),
+        # left panel and main plot
         html.Div(children=[left_panel, fig_div]),
+        # Table with top words for chosen topics
         html.Div([
             html.H2(children="Топ слов по темам"),
             html.Div(id="top_words", )
@@ -131,21 +142,26 @@ app.layout = html.Div(
 
 
 # All callbacks ===========
-@app.callback(Output("heading", "options"), [Input("source", "value")])
-def update_heading(source):
+@app.callback(Output("rubric", "options"), [Input("source", "value")])
+def update_rubric(source):
+    """For given source outputs 
+        list of available rubrics
+        """
     options = [{
-        "label": heading,
-        "value": heading
-    } for heading in container[source].keys()]
+        "label": rubric,
+        "value": rubric
+    } for rubric in container[source].keys()]
     return options
 
 
 @app.callback(Output("topics", "options"),
               [Input("source", "value"),
-               Input("heading", "value")])
-def update_topics(source, heading):
-
-    topics = container[source][heading][1]
+               Input("rubric", "value")])
+def update_topics(source, rubric):
+    """For given source and rubric
+    outputs list of available topics
+    """
+    topics = container[source][rubric][1]
     options = [{"label": topic, "value": topic} for topic in topics]
     return options
 
@@ -154,17 +170,20 @@ def update_topics(source, heading):
     Output("top_words", "children"),
     [
         Input("source", "value"),
-        Input("heading", "value"),
+        Input("rubric", "value"),
         Input("topics", "value")
     ],
 )
-def update_top_words(source, heading, topics):
+def update_top_words(source, rubric, topics):
+    """returns table with top words 
+        for every selected topic
+    """
     result = []
     for topic in topics:
         div = html.Div(
             [
-                html.H5(children=f"{heading} {topic}"),
-                html.Div(children=", ".join(top_words[heading][topic])),
+                html.H5(children=f"{rubric} {topic}"),
+                html.Div(children=", ".join(top_words[rubric][topic])),
             ],
             className="one columns",
         )
@@ -177,20 +196,23 @@ def update_top_words(source, heading, topics):
     [
         Input("source", "value"),
         Input("type_chart", "value"),
-        Input("heading", "value"),
+        Input("rubric", "value"),
         Input("topics", "value"),
     ],
 )
 def update_graph(source, type_chart, rubric,
-                 selected_topics):  # add_data_names
+                 selected_topics):
+    """creates a figure for given params"""
     df, topics = container[source][rubric]
 
     if type_chart == "ridge":
         figure = ridge_plot(df, selected_topics)
     elif type_chart == "bump":
+        # TODO: implement bump_chart
         figure = bump_chart(df, selected_topics)
+    # TODO: implement heatmap
 
-    figure["layout"]["xaxis"].update()  # (range=initial_range)
+    figure["layout"]["xaxis"].update()
 
     return figure
 
