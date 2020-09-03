@@ -19,7 +19,7 @@ add_colors = cl.to_rgb(cl.scales["7"]["qual"]["Set1"])
 def load_data(path):
     """loads data into container
     source -> rubrics -> topics data and topics names
-    result is dict like this: 
+    result is dict like this:
     {'ria': {'sport: (pd.DataFrame(), [topic_1, topic_2]), ...}, ...}
     {source: {rubric: (df with topic values, list of topic_names)
     source is defined by directory name
@@ -43,7 +43,7 @@ def load_data(path):
 
 def preprocess_data(df):
     """makes date column from year and month
-    scales data by it's std and magic constant 50 
+    scales data by it's std and magic constant 50
     (scaled to offset in ridgeline plot)
     """
     df["date"] = ["{}-{:02d}-01".format(a, b) for a, b in df[["year", "month"]].values]
@@ -105,7 +105,7 @@ def bump_chart(df, topics):
 
 def ridge_plot(df, topics, offset=100, add_offset=10):
     """
-    df: pandas DataFrame with columns date (type: datetime) 
+    df: pandas DataFrame with columns date (type: datetime)
         and columns listed in parameter topics (list of str),
         each topic column of numerical type, float or int
     topics: list of column names to draw

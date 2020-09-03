@@ -147,7 +147,7 @@ app.layout = html.Div(
 # All callbacks ===========
 @app.callback(Output("rubric", "options"), [Input("source", "value")])
 def update_rubric(source):
-    """For given source outputs 
+    """For given source outputs
         list of available rubrics
         """
     options = [
@@ -173,7 +173,7 @@ def update_topics(source, rubric):
     [Input("source", "value"), Input("rubric", "value"), Input("topics", "value")],
 )
 def update_top_words(source, rubric, topics):
-    """returns table with top words 
+    """returns table with top words
         for every selected topic
     """
     result = []
