@@ -1,5 +1,5 @@
 
-![](https://storage.yandexcloud.net/datasouls-ods/cache/c2/b9/c2b9fd99fb273f2f569242ef62f4cd03.jpg)  
+![](https://storage.yandexcloud.net/datasouls-ods/cache/0b/21/0b2195354066ea3d98da6c1a15de766d.jpg)  
 
 Часть инициативы <img src="https://ods.ai/ods/logo/ml4sg.svg" width="30"> ML4SG от [ods.ai](https://ods.ai)
 
