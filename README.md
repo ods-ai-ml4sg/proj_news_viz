@@ -1,3 +1,6 @@
+# ПРОЕКТ ПЕРЕЕЗЖАЕТ
+Вот сюда [https://github.com/newsviz/newsviz](https://github.com/newsviz/newsviz)  
+Задачи в ISSUES пока актуальны.  
 <img src="https://raw.githubusercontent.com/iggisv9t/temp/master/news_viz_logo_eye.svg" alt="LOGO" width="300"/>  
 
 Часть инициативы <img src="https://ods.ai/ods/logo/ml4sg.svg" width="30"> ML4SG от [ods.ai](https://ods.ai)
