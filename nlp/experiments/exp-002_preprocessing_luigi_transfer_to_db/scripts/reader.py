@@ -43,13 +43,13 @@ class CSVCorpusReader(CategorizedCorpusReader, CorpusReader):
         self.__tokens = Counter()
 
     @property
-    def gettokens(self):
+    def get_tokens(self):
         """
-        Возвращает список токенов, полученных в ходе метода describe
+        Возвращает список токенов, полученных в ходе метода get_descriptions
         """
         return self.__tokens
 
-    def resolve(self, fileids, categories):
+    def check_arguments(self, fileids, categories):
         """
         Возвращает список идентификаторов файлов или названий директорий,
         которые передаются каждой внутренний функции объекта чтения корпуса.
@@ -61,13 +61,13 @@ class CSVCorpusReader(CategorizedCorpusReader, CorpusReader):
             return self.fileids(categories)
         return fileids
 
-    def docs(self, fileids=None, categories=None):
+    def read_docs(self, fileids=None, categories=None):
         """
         Возвращает содержимое документа csv, закрывая его
         по завершении чтения.
         """
         # Получить список файлов для чтения
-        fileids = self.resolve(fileids, categories)
+        fileids = self.check_arguments(fileids, categories)
 
         # Создать генератор загружающий документы в память
         # по одному. Следующий блок увеличивает размер ячейки
@@ -89,50 +89,30 @@ class CSVCorpusReader(CategorizedCorpusReader, CorpusReader):
         for path, encoding in self.abspaths(fileids, include_encoding=True):
             with codecs.open(path, 'r', encoding=encoding) as f:
                 reader = list(csv.DictReader(f, delimiter=',', quotechar='"', escapechar='\\'))
+                # reader = list(csv.DictReader(f, delimiter=';', quotechar='"', escapechar='\\'))
                 for row in reader:
                     yield(row)
 
-    def sizes(self, fileids=None, categories=None):
+    def get_sizes(self, fileids=None, categories=None):
         """
         Возвращает список из идентификатора файла и его размера.
         Эта функция используется для выявления необычно больших файлов.
         """
         # Получить список файлов
-        fileids = self.resolve(fileids, categories)
+        fileids = self.check_arguments(fileids, categories)
 
         # Создать генератор, возвращающий имена и размеры файла
         for path in self.abspaths(fileids):
             yield path, os.path.getsize(path)
 
-    def listcolumns(self, fileids=None, categories=None, key='text'):
+    def read_columns(self, fileids=None, categories=None, key='text'):
         """
         Возвращает содержимое по указанному имени столбца из файла csv, в виде списка
         """
-        for doc in self.docs(fileids, categories):
+        for doc in self.read_docs(fileids, categories):
             yield(doc[key])
 
-    def sents(self, fileids=None, categories=None):
-        """
-        Функция возвращает каждую новость в виде отдельных предложений,
-        для всех новостей из обрабатываемых файлов
-        """
-        for sentence in self.listcolumns(fileids, categories):
-            sents = list(sentenize(sentence))
-            yield([_.text for _ in sents])
-
-    def words(self, fileids=None, categories=None):
-        """
-        Функция проводит токенизацию всех предложений по каждой новости,
-        возвращает список токенизированных предложений по всем новостям
-        """
-        for sentence in self.sents(fileids, categories):
-            for word in sentence:
-                if len(word) == 0:
-                    continue
-                tokens = list(tokenize(word))
-                yield([_.text for _ in tokens])
-
-    def describe(self, fileids=None, categories=None):
+    def get_descriptions(self, fileids=None, categories=None):
         """
         Обходит все документы и возвращает словарь с разнообразными
         оценками, описывающими состояние корпуса
@@ -144,7 +124,7 @@ class CSVCorpusReader(CategorizedCorpusReader, CorpusReader):
 
         # Выполнить обход всех новостей из csv, выделить предложения и слова,
         # подсчитать их
-        for i in self.docs(fileids, categories):
+        for i in self.read_docs(fileids, categories):
             counts['rows'] += 1
             sents = list(sentenize(i['text']))
             sentence = [_.text for _ in sents]
@@ -158,11 +138,11 @@ class CSVCorpusReader(CategorizedCorpusReader, CorpusReader):
                     self.__tokens[word.lower()] += 1
 
         # Определить число файлов и категорий в корпусе
-        n_fileids = len(self.resolve(fileids, categories) or self.fileids())
-        n_topics = len(self.categories(self.resolve(fileids, categories)))
+        n_fileids = len(self.check_arguments(fileids, categories) or self.fileids())
+        n_topics = len(self.categories(self.check_arguments(fileids, categories)))
 
         # Составить список новостей
-        list_news = list(self.listcolumns(fileids, categories))
+        list_news = list(self.read_columns(fileids, categories))
         # Вернуть структуру с информацией
         return {
             'Количество файлов': n_fileids,
@@ -170,20 +150,13 @@ class CSVCorpusReader(CategorizedCorpusReader, CorpusReader):
             'Количество обработанных новостей': counts['rows'],
             'Количество предложений': counts['sents'],
             'Количество слов': counts['words'],
-            'Количество токенов (словарь)': len(self.gettokens),
-            'Коэффициент лексического разнообразия (lexical diversity)': float(counts['words']) / float(len(self.gettokens)),
+            'Количество токенов (словарь)': len(self.get_tokens),
+            'Коэффициент лексического разнообразия (lexical diversity)': float(counts['words']) / float(len(self.get_tokens)),
             'Среднее количество новостей по отношению к файлам': float(counts['rows']) / float(n_fileids),
             'Среднее количество предложений в новостях': float(counts['sents']) / float(counts['rows']),
-            'Начальная дата в обработке': min(self.listcolumns(fileids, categories, 'date')),
-            'Конечная дата в обработке': max(self.listcolumns(fileids, categories, 'date')),
+            'Начальная дата в обработке': min(self.read_columns(fileids, categories, 'date')),
+            'Конечная дата в обработке': max(self.read_columns(fileids, categories, 'date')),
             'Количество повторяющихся новостей': len(list_news) - len(set(list_news)),
             'Количество пустых новостных элементов': len([item for item in list_news if len(item) == 0]),
             'Время обработки в секундах': time.time() - started,
         }
-
-
-class PickledCorpusReader():
-    """
-    Объект чтения pickle файлов
-    """
-    # //TODO

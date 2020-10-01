@@ -1,14 +1,16 @@
-from newsbot.spiders.news import NewsSpider, NewsSpiderConfig
-from scrapy import Request, Selector
 from datetime import datetime
-from typing import List
-from datetime import date
+
+from newsbot.spiders.news import NewsSpider
+from newsbot.spiders.news import NewsSpiderConfig
+from scrapy import Request
+from scrapy import Selector
+
 
 
 class RussiaTodaySpider(NewsSpider):
-    name = 'rt'
+    name = "rt"
 
-    start_urls = ['https://russian.rt.com/sitemap.xml']
+    start_urls = ["https://russian.rt.com/sitemap.xml"]
 
     config = NewsSpiderConfig(
         title_path='//h1[contains(@class, "article__heading")]/text()',
@@ -72,17 +74,48 @@ class RussiaTodaySpider(NewsSpider):
                     if link.endswith('.shtml') and not link.endswith('index.shtml'):
                         yield Request(url=link, callback=self.parse_document, priority=1000)'''
 
-    def _fix_syntax(self, sample: List[str], idx_split: int) -> List[str]:
-        """Fix timestamp syntax, droping timezone postfix.
+    def fix_date(self, raw_date):
+        """Fix date for regular and authors articles
         """
-        sample = [sample[0][:idx_split]]
-        return sample
+        months_ru = [
+            "января",
+            "февраля",
+            "марта",
+            "апреля",
+            "мая",
+            "июня",
+            "июля",
+            "августа",
+            "сентября",
+            "октября",
+            "ноября",
+            "декабря",
+        ]
 
-    def _get_date(self, lst: List[str]):
-        """Convert list into date obj.
+        if len(raw_date[0]) == 25:
+            raw_date[0] = raw_date[0][:19]
+            return raw_date
+        else:
+            for i, month in enumerate(months_ru):
+                raw_date[0] = raw_date[0].replace(month, str(i + 1))
+            return datetime.strptime(raw_date[0],
+                                     "%d %m %Y,").strftime("%Y-%m-%dT%H:%M:%S")
+
+    def cut_instagram(self, raw_text):
+        """Cut instagram quote
         """
-        y, m, d = [int(num) for num in lst]
-        return date(y, m, d)
+        clear_text = []
+        i = 0
+        while i < len(raw_text):
+            if " Посмотреть эту публикацию в Instagram" == raw_text[i]:
+
+                while "PDT" not in raw_text[i]:
+                    i += 1
+                i += 1
+            else:
+                clear_text.append(raw_text[i])
+                i += 1
+        return clear_text
 
     def parse_document(self, response):
         """Final parsing method.
