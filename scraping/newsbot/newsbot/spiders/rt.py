@@ -14,11 +14,14 @@ class RussiaTodaySpider(NewsSpider):
     config = NewsSpiderConfig(
         title_path='//h1[contains(@class, "article__heading")]/text()',
         subtitle_path="_",
-        date_path="//meta" '[contains(@name, "mediator_published_time")]/@content',
+        date_path="//meta"
+        '[contains(@name, "mediator_published_time")]/@content',
         date_format="%Y-%m-%dT%H:%M:%S",
-        text_path='//div[contains(@class, "article__text") or contains(@class, "article__summary")]//text()',
+        text_path=
+        '//div[contains(@class, "article__text") or contains(@class, "article__summary")]//text()',
         topics_path='//meta[contains(@name, "mediator_theme")]/@content',
-        subtopics_path='//a[@data-trends-link=substring(//div[contains(@class, "layout__control-width")]/script, 50, 24)]//text()',
+        subtopics_path=
+        '//a[@data-trends-link=substring(//div[contains(@class, "layout__control-width")]/script, 50, 24)]//text()',
         authors_path='//meta[contains(@name, "mediator_author")]/@content',
         tags_path='//a[contains(@rel, "tag")]//text()',
         reposts_fb_path="_",
@@ -37,45 +40,36 @@ class RussiaTodaySpider(NewsSpider):
         body = response.body
         links = Selector(text=body).xpath("//loc/text()").getall()
         last_modif_dts = Selector(text=body).xpath("//lastmod/text()").getall()
-        if (
-            self.start_date
-            >= datetime.strptime(
-                max(last_modif_dts).replace(":", ""), "%Y-%m-%d"
-            ).date()
-            >= self.until_date
-        ):
+        if (self.start_date >= datetime.strptime(
+                max(last_modif_dts).replace(":", ""), "%Y-%m-%d").date() >=
+                self.until_date):
             for link, last_modif_dt in zip(links, last_modif_dts):
                 # Convert last_modif_dt to datetime
                 last_modif_dt = datetime.strptime(
-                    last_modif_dt.replace(":", ""), "%Y-%m-%d"
-                )
+                    last_modif_dt.replace(":", ""), "%Y-%m-%d")
 
-                if (
-                    last_modif_dt.date() >= self.until_date
-                    and last_modif_dt.date() <= self.start_date
-                ):
-                    yield Request(url=link, callback=self.parse_sub_sitemap, priority=1)
+                if (last_modif_dt.date() >= self.until_date
+                        and last_modif_dt.date() <= self.start_date):
+                    yield Request(url=link,
+                                  callback=self.parse_sub_sitemap,
+                                  priority=1)
 
     def parse_sub_sitemap(self, response):
         # Parse sub sitemaps
         body = response.body
         links = Selector(text=body).xpath("//loc/text()").getall()
         last_modif_dts = Selector(text=body).xpath("//lastmod/text()").getall()
-        if (
-            self.start_date
-            >= datetime.strptime(
-                max(last_modif_dts).replace(":", ""), "%Y-%m-%dT%H%M%S%z"
-            ).date()
-            >= self.until_date
-        ):
+        if (self.start_date >= datetime.strptime(
+                max(last_modif_dts).replace(":", ""),
+                "%Y-%m-%dT%H%M%S%z").date() >= self.until_date):
             for link, last_modif_dt in zip(links, last_modif_dts):
                 # Convert last_modif_dt to datetime
                 last_modif_dt = datetime.strptime(
-                    last_modif_dt.replace(":", ""), "%Y-%m-%dT%H%M%S%z"
-                )
+                    last_modif_dt.replace(":", ""), "%Y-%m-%dT%H%M%S%z")
                 if self.start_date >= last_modif_dt.date() >= self.until_date:
-                    yield Request(url=link, callback=self.parse_document, priority=100)
-
+                    yield Request(url=link,
+                                  callback=self.parse_document,
+                                  priority=100)
         """def parse_articles_sitemap(self, response):
         # Parse sub sitemaps
         body = response.body
@@ -114,9 +108,8 @@ class RussiaTodaySpider(NewsSpider):
         else:
             for i, month in enumerate(months_ru):
                 raw_date[0] = raw_date[0].replace(month, str(i + 1))
-            return datetime.strptime(raw_date[0], "%d %m %Y,").strftime(
-                "%Y-%m-%dT%H:%M:%S"
-            )
+            return datetime.strptime(raw_date[0],
+                                     "%d %m %Y,").strftime("%Y-%m-%dT%H:%M:%S")
 
     def cut_instagram(self, raw_text):
         """Cut instagram quote"""
@@ -139,9 +132,13 @@ class RussiaTodaySpider(NewsSpider):
         for item in super().parse_document(response):
             # Try to drop timezone postfix.
             if "tags" in item:
-                item["tags"] = [tag.strip() for tag in item["tags"] if tag.strip()]
+                item["tags"] = [
+                    tag.strip() for tag in item["tags"] if tag.strip()
+                ]
             if "subtitle" in item:
-                item["subtitle"] = [s.strip() for s in item["subtitle"] if s.strip()]
+                item["subtitle"] = [
+                    s.strip() for s in item["subtitle"] if s.strip()
+                ]
             try:
                 item["date"] = self._fix_syntax(item["date"], -6)
             except KeyError:

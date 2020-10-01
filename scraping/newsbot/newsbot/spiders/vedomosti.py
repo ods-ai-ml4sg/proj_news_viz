@@ -12,11 +12,13 @@ class VedomostiSpider(NewsSpider):
     name = "vedomosti"
     start_urls = ["https://www.vedomosti.ru/newsline"]
     config = NewsSpiderConfig(
-        title_path='(.//div[contains(@class, "b-news-item__title")]//h1)[1]/text()',
+        title_path=
+        '(.//div[contains(@class, "b-news-item__title")]//h1)[1]/text()',
         subtitle_path="_",
         date_path='//time[@class="b-newsline-item__time"]/@pubdate',
         date_format="%Y-%m-%d %H:%M:%S %z",  # 2019-03-02 20:08:47 +0300
-        text_path='(.//div[contains(@class, "b-news-item__text")])[1]/p//text()',
+        text_path=
+        '(.//div[contains(@class, "b-news-item__text")])[1]/p//text()',
         topics_path='(.//div[contains(@class, "io-category")])[1]/text()',
         subtopics_path="_",
         authors_path="_",
@@ -32,8 +34,7 @@ class VedomostiSpider(NewsSpider):
         comm_count_path="_",
     )
     news_le = LinkExtractor(
-        restrict_xpaths='//div[contains(@class, "b-newsline-item__title")]'
-    )
+        restrict_xpaths='//div[contains(@class, "b-newsline-item__title")]')
 
     def parse(self, response):
         if response.meta.get("page_depth", 1) > 1:
@@ -50,20 +51,26 @@ class VedomostiSpider(NewsSpider):
             # Getting publication date for every article
             pub_dts = resp.xpath(self.config.date_path).extract()
             # Convert datetimes of publication from string to datetime
-            pub_dts = [datetime.strptime(dt, self.config.date_format) for dt in pub_dts]
+            pub_dts = [
+                datetime.strptime(dt, self.config.date_format)
+                for dt in pub_dts
+            ]
         else:
             # Getting publication date for every article
             pub_dts = response.xpath(self.config.date_path).extract()
             # Convert datetimes of publication from string to datetime
-            pub_dts = [datetime.strptime(dt, self.config.date_format) for dt in pub_dts]
+            pub_dts = [
+                datetime.strptime(dt, self.config.date_format)
+                for dt in pub_dts
+            ]
 
             links = [i.url for i in self.news_le.extract_links(response)]
 
         for link, pub_dt in zip(links, pub_dts):
             if pub_dt.date() >= self.until_date:
-                yield scrapy.Request(
-                    url=link, callback=self.parse_document, meta={"date": pub_dt}
-                )
+                yield scrapy.Request(url=link,
+                                     callback=self.parse_document,
+                                     meta={"date": pub_dt})
 
         # Get the last page in the page to see, whether we need another page
         last_dt = list(pub_dts)[-1]
@@ -87,7 +94,9 @@ class VedomostiSpider(NewsSpider):
 
     def parse_document(self, response):
         for res in super().parse_document(response):
-            res["date"] = [response.meta.get("date").strftime(self.config.date_format)]
+            res["date"] = [
+                response.meta.get("date").strftime(self.config.date_format)
+            ]
 
             res["text"] = [text.strip() for text in res["text"]]
             res["title"] = [text.strip() for text in res["title"]]

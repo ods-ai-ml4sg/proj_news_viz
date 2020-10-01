@@ -39,14 +39,15 @@ class KommersantSpider(NewsSpider):
         views_path="_",
         comm_count_path="_",
     )
-    news_le = LinkExtractor(restrict_xpaths='//div[@class="archive_result__item_text"]')
+    news_le = LinkExtractor(
+        restrict_xpaths='//div[@class="archive_result__item_text"]')
 
     def parse(self, response):
         # Parse most recent news
         for i in self.news_le.extract_links(response):
-            yield scrapy.Request(
-                url=i.url, callback=self.parse_document, meta={"page_dt": self.page_dt}
-            )
+            yield scrapy.Request(url=i.url,
+                                 callback=self.parse_document,
+                                 meta={"page_dt": self.page_dt})
 
         # If it's not the end of the page, request more news from archive by calling recursive "parse_page" function
         more_link = response.xpath(
@@ -98,7 +99,9 @@ class KommersantSpider(NewsSpider):
             # If it's a gallery (no text) or special project then don't return anything (have another html layout)
             if "text" not in res or "title" not in res:
                 break
-            res["tags"] = [tags.strip(",").replace(",", ", ") for tags in res["tags"]]
+            res["tags"] = [
+                tags.strip(",").replace(",", ", ") for tags in res["tags"]
+            ]
 
             if "Ъ-FM" in res["topics"][0]:
                 l = res["topics"][0].split(",")

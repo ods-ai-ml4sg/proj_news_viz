@@ -19,7 +19,8 @@ class IzSpider(NewsSpider):
         topics_path='//div[contains(@itemprop, "genre")]//'
         'a[contains(@href, "rubric") or contains(@href, "press-release")]//text()',
         subtopics_path="_",
-        authors_path='//div[contains(@itemprop, "author")]//a[contains(@href, "author")]//text()',
+        authors_path=
+        '//div[contains(@itemprop, "author")]//a[contains(@href, "author")]//text()',
         tags_path='//div[contains(@class, "hash_tags")]//a//text()',
         reposts_fb_path="_",
         reposts_vk_path="_",
@@ -68,9 +69,8 @@ class IzSpider(NewsSpider):
         last_modif_dts = Selector(text=body).xpath("//lastmod/text()").getall()
 
         # Sort news by modification date descending
-        news = [
-            (link, last_modif_dt) for link, last_modif_dt in zip(links, last_modif_dts)
-        ]
+        news = [(link, last_modif_dt)
+                for link, last_modif_dt in zip(links, last_modif_dts)]
         sorted_news = sorted(news, key=lambda x: x[1], reverse=True)
 
         # Iterate news and parse them

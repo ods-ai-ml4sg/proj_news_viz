@@ -39,10 +39,12 @@ class NewsbotPipeline(object):
         self.file.close()
 
     def process_item(self, item, spider):
-        dt = datetime.datetime.strptime(item["date"][0], spider.config.date_format)
+        dt = datetime.datetime.strptime(item["date"][0],
+                                        spider.config.date_format)
 
         item["title"] = spider.process_title(item["title"][0])
-        item["subtitle"] = "; ".join(spider.process_title(item.get("subtitle", "-")))
+        item["subtitle"] = "; ".join(
+            spider.process_title(item.get("subtitle", "-")))
         item["topics"] = ", ".join(item.get("topics", "-"))
         item["subtopics"] = ", ".join(item.get("subtopics", "-"))
         item["authors"] = ", ".join(item.get("authors", "-"))

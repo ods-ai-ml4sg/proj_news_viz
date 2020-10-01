@@ -14,7 +14,6 @@ LOG_LEVEL = "ERROR"
 SPIDER_MODULES = ["newsbot.spiders"]
 NEWSPIDER_MODULE = "newsbot.spiders"
 
-
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = "newsbot"
 

@@ -19,8 +19,10 @@ class RiaSpider(NewsSpider):
         subtitle_path="_",
         date_path='//div[contains(@class, "endless__item")]/@data-published',
         date_format="%Y-%m-%dT%H:%MZ",
-        text_path='//div[contains(@class, "article__block") and @data-type = "text"]//text()',
-        topics_path='//div[contains(@class, "endless__item")]/@data-analytics-rubric',
+        text_path=
+        '//div[contains(@class, "article__block") and @data-type = "text"]//text()',
+        topics_path=
+        '//div[contains(@class, "endless__item")]/@data-analytics-rubric',
         subtopics_path="_",
         authors_path="_",
         tags_path='//div[contains(@class, "endless__item")]/@data-keywords',
@@ -42,11 +44,12 @@ class RiaSpider(NewsSpider):
         article_links = news_le.extract_links(response)
 
         for link in article_links:
-            yield scrapy.Request(
-                url=link.url, callback=self.parse_document, priority=100
-            )
+            yield scrapy.Request(url=link.url,
+                                 callback=self.parse_document,
+                                 priority=100)
 
-        adding = response.xpath('//div[contains(@class, "list-more")]/@data-url').get()
+        adding = response.xpath(
+            '//div[contains(@class, "list-more")]/@data-url').get()
         if adding:
             new_url = "https://www.ria.ru" + adding
             if self.start_date >= self.dt.date() >= self.until_date:
@@ -56,8 +59,7 @@ class RiaSpider(NewsSpider):
 
         if self.start_date >= self.dt.date() >= self.until_date:
             new_url = self.link_tmpl.format(
-                str(self.dt.year) + str(self.dt.month) + str(self.dt.day)
-            )
+                str(self.dt.year) + str(self.dt.month) + str(self.dt.day))
             yield scrapy.Request(url=new_url, callback=self.parse)
 
     def parse_next(self, response):
@@ -66,13 +68,13 @@ class RiaSpider(NewsSpider):
 
         article_links = news_le.extract_links(response)
         for link in article_links:
-            yield scrapy.Request(
-                url=link.url, callback=self.parse_document, priority=100
-            )
+            yield scrapy.Request(url=link.url,
+                                 callback=self.parse_document,
+                                 priority=100)
 
         adding = response.xpath(
-            '//div[contains(@class, "list-items-loaded")]/@data-next-url'
-        ).get()
+            '//div[contains(@class, "list-items-loaded")]/@data-next-url').get(
+            )
 
         if adding:
             new_url = "https://www.ria.ru" + adding

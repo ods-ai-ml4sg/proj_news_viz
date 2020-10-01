@@ -41,16 +41,22 @@ class MeduzaSpider(NewsSpider):
     ]
 
     config = NewsSpiderConfig(
-        title_path='//h1[contains(@class,"RichTitle-root") or contains(@class,"SimpleTitle-root") or contains(@class,"RichTitle-root RichTitle-slide")]//text()',
-        subtitle_path='//h3[contains(@class, "CardTitle-title") or contains(@class, "SimpleBlock-h3")]//text()',
+        title_path=
+        '//h1[contains(@class,"RichTitle-root") or contains(@class,"SimpleTitle-root") or contains(@class,"RichTitle-root RichTitle-slide")]//text()',
+        subtitle_path=
+        '//h3[contains(@class, "CardTitle-title") or contains(@class, "SimpleBlock-h3")]//text()',
         date_path='//time[contains(@class,"Timestamp-root")]/text()',
         date_format="%H:%M, %d %m %Y",
-        text_path='//div[contains(@class,"GeneralMaterial-article") or contains(@class, "SlidesMaterial-layout") '
-        + 'or contains(@class,"MediaCaption-caption")]//p//text() | //div[contains(@class, "MediaCaption-caption")]//text() | '
-        + '//p[contains(@class,"SimpleBlock-p") or contains(@class,"SimpleBlock-lead")]//text()',
+        text_path=
+        '//div[contains(@class,"GeneralMaterial-article") or contains(@class, "SlidesMaterial-layout") '
+        +
+        'or contains(@class,"MediaCaption-caption")]//p//text() | //div[contains(@class, "MediaCaption-caption")]//text() | '
+        +
+        '//p[contains(@class,"SimpleBlock-p") or contains(@class,"SimpleBlock-lead")]//text()',
         topics_path="_",
         subtopics_path="_",
-        authors_path='//p[contains(@class, "MaterialNote-note_caption")]/strong/text()',
+        authors_path=
+        '//p[contains(@class, "MaterialNote-note_caption")]/strong/text()',
         tags_path="_",
         reposts_fb_path="_",
         reposts_vk_path="_",
@@ -69,14 +75,19 @@ class MeduzaSpider(NewsSpider):
         jsonresponse = json.loads(response.body_as_unicode())
 
         # Getting article items
-        articles = [content for _, content in jsonresponse["documents"].items()]
+        articles = [
+            content for _, content in jsonresponse["documents"].items()
+        ]
         # Sorting them from the most recent to the most late one
-        articles = sorted(articles, key=lambda x: x["published_at"], reverse=True)
+        articles = sorted(articles,
+                          key=lambda x: x["published_at"],
+                          reverse=True)
 
         # Filtering out late articles and checking if we have reached the "until_date"
         filtered_articles = []
         for content in articles:
-            pub_date = datetime.strptime(content["pub_date"], "%Y-%m-%d").date()
+            pub_date = datetime.strptime(content["pub_date"],
+                                         "%Y-%m-%d").date()
             if self.start_date >= pub_date >= self.until_date:
 
                 filtered_articles.append(content)

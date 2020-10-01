@@ -36,10 +36,10 @@ class TvZvezdaSpider(NewsSpider):
 
         if response.url not in self.visited_urls:
             for link in self.news_le.extract_links(response):
-                yield scrapy.Request(url=link.url, callback=self.parse_document)
+                yield scrapy.Request(url=link.url,
+                                     callback=self.parse_document)
         next_pages = response.xpath(
-            '//a[contains(@class, "all_news js-ajax-call")]/@href'
-        ).extract()
+            '//a[contains(@class, "all_news js-ajax-call")]/@href').extract()
         next_pages = next_pages[-1]
         new_url = "20/" + str(self.z) + "/?_=1542171175300"
         self.z += 20

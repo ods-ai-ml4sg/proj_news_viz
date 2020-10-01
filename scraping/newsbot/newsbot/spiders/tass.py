@@ -11,7 +11,8 @@ class RussiaTassSpider(NewsSpider):
     name = "tass"
     start_urls = ["https://tass.ru/sitemap.xml"]
     config = NewsSpiderConfig(
-        title_path='//h1[contains(@class, "news-header__title") or contains(@class, "explainer__title") or contains(@class, "article__title")]//text()',
+        title_path=
+        '//h1[contains(@class, "news-header__title") or contains(@class, "explainer__title") or contains(@class, "article__title")]//text()',
         subtitle_path='//div[contains(@class, "news-header__lead")]//text()',
         date_path='//dateformat[@mode="abs"]/@time',
         date_format="%Y-%m-%dT%H%M%S%z",
@@ -37,50 +38,42 @@ class RussiaTassSpider(NewsSpider):
         links = Selector(text=body).xpath("//loc/text()").getall()
         last_modif_dts = Selector(text=body).xpath("//lastmod/text()").getall()
         print(last_modif_dts[0], last_modif_dts[-1])
-        if (
-            self.start_date
-            >= datetime.strptime(
-                max(last_modif_dts).replace(":", ""), "%Y-%m-%dT%H%M%S%z"
-            ).date()
-            >= self.until_date
-        ):
+        if (self.start_date >= datetime.strptime(
+                max(last_modif_dts).replace(":", ""),
+                "%Y-%m-%dT%H%M%S%z").date() >= self.until_date):
             for link, last_modif_dt in zip(links, last_modif_dts):
                 # Convert last_modif_dt to datetime
                 last_modif_dt = datetime.strptime(
-                    last_modif_dt.replace(":", ""), "%Y-%m-%dT%H%M%S%z"
-                )
+                    last_modif_dt.replace(":", ""), "%Y-%m-%dT%H%M%S%z")
 
-                if (
-                    last_modif_dt.date() >= self.until_date
-                    and last_modif_dt.date() <= self.start_date
-                ):
-                    yield Request(url=link, callback=self.parse_sub_sitemap, priority=1)
+                if (last_modif_dt.date() >= self.until_date
+                        and last_modif_dt.date() <= self.start_date):
+                    yield Request(url=link,
+                                  callback=self.parse_sub_sitemap,
+                                  priority=1)
 
     def parse_sub_sitemap(self, response):
         # Parse sub sitemaps
         body = response.body
         links = Selector(text=body).xpath("//loc/text()").getall()
         last_modif_dts = Selector(text=body).xpath("//lastmod/text()").getall()
-        if (
-            self.start_date
-            >= datetime.strptime(
-                max(last_modif_dts).replace(":", ""), "%Y-%m-%dT%H%M%S%z"
-            ).date()
-            >= self.until_date
-        ):
+        if (self.start_date >= datetime.strptime(
+                max(last_modif_dts).replace(":", ""),
+                "%Y-%m-%dT%H%M%S%z").date() >= self.until_date):
             print(max(last_modif_dts))
             print(len(links))
             for link, last_modif_dt in zip(links, last_modif_dts):
                 # Convert last_modif_dt to datetime
                 last_modif_dt = datetime.strptime(
-                    last_modif_dt.replace(":", ""), "%Y-%m-%dT%H%M%S%z"
-                )
+                    last_modif_dt.replace(":", ""), "%Y-%m-%dT%H%M%S%z")
                 if self.start_date >= last_modif_dt.date() >= self.until_date:
                     yield Request(
                         url=link,
                         callback=self.parse_document,
                         priority=100,
-                        meta={"date": last_modif_dt.strftime("%Y-%m-%dT%H%M%S%z")},
+                        meta={
+                            "date": last_modif_dt.strftime("%Y-%m-%dT%H%M%S%z")
+                        },
                     )
 
     def parse_document(self, response):
@@ -90,9 +83,8 @@ class RussiaTassSpider(NewsSpider):
             item["date"] = [response.meta.get("date")]
             if "text" in item:
                 if re.search("/.+/. ([\d\D]+)", item["text"][0]):
-                    item["text"][0] = re.search(
-                        "/.+/. ([\d\D]+)", item["text"][0]
-                    ).group(1)
+                    item["text"][0] = re.search("/.+/. ([\d\D]+)",
+                                                item["text"][0]).group(1)
             if "topics" in item:
                 item["topics"] = [
                     re.search(r"-([\s\w]+)-", topic).group(1).strip()
