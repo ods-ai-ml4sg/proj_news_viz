@@ -1,9 +1,11 @@
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
+from datetime import timedelta
 
 import lxml.html
 import scrapy
-from newsbot.spiders.news import NewsSpider, NewsSpiderConfig
+from newsbot.spiders.news import NewsSpider
+from newsbot.spiders.news import NewsSpiderConfig
 from scrapy.linkextractors import LinkExtractor
 
 

@@ -1,7 +1,8 @@
 import datetime
 import re
 
-from newsbot.spiders.news import NewsSpider, NewsSpiderConfig
+from newsbot.spiders.news import NewsSpider
+from newsbot.spiders.news import NewsSpiderConfig
 
 
 class InterfaxSpider(NewsSpider):

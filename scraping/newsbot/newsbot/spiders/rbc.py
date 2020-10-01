@@ -3,7 +3,8 @@ import time
 from datetime import datetime
 
 import scrapy
-from newsbot.spiders.news import NewsSpider, NewsSpiderConfig
+from newsbot.spiders.news import NewsSpider
+from newsbot.spiders.news import NewsSpiderConfig
 from scrapy.http import HtmlResponse
 
 

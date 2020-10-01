@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # Scrapy settings for newsbot project
 #
 # For simplicity, this file contains only settings considered important or
