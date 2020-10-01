@@ -14,7 +14,7 @@ class RbcSpider(NewsSpider):
     start_urls = [link_tmpl.format(int(time.time()))]
     config = NewsSpiderConfig(
         title_path='//span[contains(@class, "js-slide-title")]//text()',
-        subtitle_path= '//div[contains(@class, "article__text__overview")]/span//text()',
+        subtitle_path='//div[contains(@class, "article__text__overview")]/span//text()',
         date_path='_',
         date_format='%Y-%m-%d %H:%M:%S',
         text_path='(.//div[contains(@class, "article__text")])'
@@ -22,7 +22,7 @@ class RbcSpider(NewsSpider):
         topics_path='(.//a[contains(@class, "article__header__category")])[1]//text()',
         subtopics_path='_',
         authors_path='//div[contains(@class, "article__authors")]/text()',
-        tags_path = '//div[contains(@class, "article__tags")]//a//text()',
+        tags_path='//div[contains(@class, "article__tags")]//a//text()',
         reposts_fb_path='_',
         reposts_vk_path='_',
         reposts_ok_path='_',
@@ -57,23 +57,28 @@ class RbcSpider(NewsSpider):
             yield scrapy.Request(url=link_url,
                                  priority=100,
                                  callback=self.parse,
-                                 meta={'page_depth': response.meta.get('page_depth', 1) + 1}
+                                 meta={'page_depth': response.meta.get(
+                                     'page_depth', 1) + 1}
                                  )
 
     def parse_document(self, response):
         for res in super().parse_document(response):
-            res['date'] = [response.meta["pub_dt"].strftime(self.config.date_format)]
+            res['date'] = [response.meta["pub_dt"].strftime(
+                self.config.date_format)]
 
             # If the article is located in "www.rbc.ru" url, then return it
             # (not "sportrbc.ru", "delovtb.rbc.ru" e t.c. because they have another html layout)
             if 'topics' in res:
                 res['topics'] = [topics.strip(',') for topics in res['topics']]
             if 'tags' in res:
-                res['tags'] = [', '.join([j.strip() for j in i.split(',') if j.strip()]) for i in res['tags']]
+                res['tags'] = [
+                    ', '.join([j.strip() for j in i.split(',') if j.strip()]) for i in res['tags']]
             if res['edition'][0] == '-':
                 if 'authors' in res:
-                    res['authors'] = [i.replace('\n', '').strip() for i in res['authors'] if i.replace('\n', '').strip()]
-                    res['authors'] = [authors.strip('.') for authors in res['authors']]
+                    res['authors'] = [i.replace('\n', '').strip(
+                    ) for i in res['authors'] if i.replace('\n', '').strip()]
+                    res['authors'] = [authors.strip(
+                        '.') for authors in res['authors']]
 
                 res['text'] = [i.replace('\xa0', ' ') for i in res['text']]
 

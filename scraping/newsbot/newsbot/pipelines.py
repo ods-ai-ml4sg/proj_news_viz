@@ -6,12 +6,14 @@
 import datetime
 import csv
 
+
 class NewsbotPipeline(object):
     def open_spider(self, spider):
         self.file = open(spider.name + '.csv', 'w', encoding='utf8')
         self.writer = csv.writer(self.file, delimiter=',')
         # Write header to the resulting file
-        self._fields = ["date", "url", "edition", "topics", "subtopics", "authors", "tags", "title", "subtitle", "text"]
+        self._fields = ["date", "url", "edition", "topics",
+                        "subtopics", "authors", "tags", "title", "subtitle", "text"]
         self._metrics = ["reposts_fb", "reposts_vk", "reposts_ok", "reposts_twi",
                          "reposts_lj", "reposts_tg", "likes", "views", "comm_count"]
         self.file.write(','.join(self._fields + self._metrics) + '\n')
@@ -20,10 +22,12 @@ class NewsbotPipeline(object):
         self.file.close()
 
     def process_item(self, item, spider):
-        dt = datetime.datetime.strptime(item["date"][0], spider.config.date_format)
+        dt = datetime.datetime.strptime(
+            item["date"][0], spider.config.date_format)
 
         item["title"] = spider.process_title(item["title"][0])
-        item["subtitle"] = '; '.join(spider.process_title(item.get("subtitle", '-')))
+        item["subtitle"] = '; '.join(
+            spider.process_title(item.get("subtitle", '-')))
         item["topics"] = ', '.join(item.get("topics", '-'))
         item["subtopics"] = ', '.join(item.get("subtopics", "-"))
         item["authors"] = ', '.join(item.get("authors", "-"))
@@ -67,4 +71,3 @@ class NewsbotPipeline(object):
                 item[m] = spider.process_metric(item.get(m, ['0']))
 
         return item
-

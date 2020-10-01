@@ -57,13 +57,15 @@ class NewsSpider(scrapy.Spider):
 
         # Trying to parse 'until_date' param as date
         if 'until_date' in kwargs:
-            kwargs['until_date'] = datetime.strptime(kwargs['until_date'], '%d.%m.%Y').date()
+            kwargs['until_date'] = datetime.strptime(
+                kwargs['until_date'], '%d.%m.%Y').date()
         else:
             # If there's no 'until_date' param, get articles for today and yesterday
             kwargs['until_date'] = (datetime.now() - timedelta(days=1)).date()
 
         if 'start_date' in kwargs:
-            kwargs['start_date'] = datetime.strptime(kwargs['start_date'], '%d.%m.%Y').date()
+            kwargs['start_date'] = datetime.strptime(
+                kwargs['start_date'], '%d.%m.%Y').date()
         else:
             kwargs['start_date'] = datetime.now().date()
 
@@ -109,4 +111,3 @@ class NewsSpider(scrapy.Spider):
         # Remove whitespaces
         metrics = [i.strip() for i in metrics if i.strip()]
         return metrics[0]
-

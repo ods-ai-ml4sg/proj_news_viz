@@ -22,14 +22,14 @@ class KommersantSpider(NewsSpider):
 
     config = NewsSpiderConfig(
         title_path='//h2[contains(@class, "article_name")]//text()',
-        subtitle_path= '//h1[contains(@class, "article_subhead")]//text()',
+        subtitle_path='//h1[contains(@class, "article_subhead")]//text()',
         date_path='//meta[contains(@property, "published_time")]/@content',
         date_format='%Y-%m-%dT%H:%M:%S%z',  # 2019-03-09T12:03:10+03:00
         text_path='//p[@class="b-article__text"]//text()',
         topics_path='//meta[contains(@name, "category")]/@content',
         subtopics_path='_',
         authors_path='//p[contains(@class, "document_authors")]//text()',
-        tags_path = '//meta[contains(@name, "keywords")]/@content',
+        tags_path='//meta[contains(@name, "keywords")]/@content',
         reposts_fb_path='_',
         reposts_vk_path='_',
         reposts_ok_path='_',
@@ -40,7 +40,8 @@ class KommersantSpider(NewsSpider):
         views_path='_',
         comm_count_path='_'
     )
-    news_le = LinkExtractor(restrict_xpaths='//div[@class="archive_result__item_text"]')
+    news_le = LinkExtractor(
+        restrict_xpaths='//div[@class="archive_result__item_text"]')
 
     def parse(self, response):
         # Parse most recent news
@@ -48,7 +49,8 @@ class KommersantSpider(NewsSpider):
             yield scrapy.Request(url=i.url, callback=self.parse_document, meta={'page_dt': self.page_dt})
 
         # If it's not the end of the page, request more news from archive by calling recursive "parse_page" function
-        more_link = response.xpath('//button[contains(@class, "lazyload-button")]/@data-lazyload-url').extract()
+        more_link = response.xpath(
+            '//button[contains(@class, "lazyload-button")]/@data-lazyload-url').extract()
         if more_link:
             yield scrapy.Request(url='{}{}'.format(self.base_url, more_link[0]),
                                  callback=self.parse_page,
@@ -72,7 +74,8 @@ class KommersantSpider(NewsSpider):
             yield scrapy.Request(url=i.url, callback=self.parse_document)
 
         # Take a link from "more" button
-        more_link = response.xpath('//button[contains(@class, "lazyload-button")]/@data-lazyload-url').extract()
+        more_link = response.xpath(
+            '//button[contains(@class, "lazyload-button")]/@data-lazyload-url').extract()
         if more_link:
             yield scrapy.Request(url='{}{}'.format(self.base_url, more_link[0]),
                                  callback=self.parse_page,
@@ -85,8 +88,8 @@ class KommersantSpider(NewsSpider):
             # If it's a gallery (no text) or special project then don't return anything (have another html layout)
             if 'text' not in res or 'title' not in res:
                 break
-            res['tags'] = [tags.strip(',').replace(',', ', ') for tags in res['tags']]
-
+            res['tags'] = [tags.strip(',').replace(',', ', ')
+                           for tags in res['tags']]
 
             if 'Ъ-FM' in res['topics'][0]:
                 l = res['topics'][0].split(',')
@@ -98,7 +101,6 @@ class KommersantSpider(NewsSpider):
             else:
                 res['topics'][0] = res['topics'][0].replace(',', ', ')
                 res['topics'][0] = res['topics'][0].replace('.', ', ')
-
 
             # Remove ":" in timezone
             pub_dt = res['date'][0]

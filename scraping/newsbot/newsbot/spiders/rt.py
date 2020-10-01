@@ -6,7 +6,6 @@ from scrapy import Request
 from scrapy import Selector
 
 
-
 class RussiaTodaySpider(NewsSpider):
     name = "rt"
 
@@ -14,7 +13,7 @@ class RussiaTodaySpider(NewsSpider):
 
     config = NewsSpiderConfig(
         title_path='//h1[contains(@class, "article__heading")]/text()',
-        subtitle_path= '_',
+        subtitle_path='_',
         date_path='//meta'
         '[contains(@name, "mediator_published_time")]/@content',
         date_format="%Y-%m-%dT%H:%M:%S",
@@ -22,7 +21,7 @@ class RussiaTodaySpider(NewsSpider):
         topics_path='//meta[contains(@name, "mediator_theme")]/@content',
         subtopics_path='//a[@data-trends-link=substring(//div[contains(@class, "layout__control-width")]/script, 50, 24)]//text()',
         authors_path='//meta[contains(@name, "mediator_author")]/@content',
-        tags_path = '//a[contains(@rel, "tag")]//text()',
+        tags_path='//a[contains(@rel, "tag")]//text()',
         reposts_fb_path='_',
         reposts_vk_path='_',
         reposts_ok_path='_',
@@ -42,7 +41,8 @@ class RussiaTodaySpider(NewsSpider):
         if self.start_date >= datetime.strptime(max(last_modif_dts).replace(':', ''), '%Y-%m-%d').date() >= self.until_date:
             for link, last_modif_dt in zip(links, last_modif_dts):
                 # Convert last_modif_dt to datetime
-                last_modif_dt = datetime.strptime(last_modif_dt.replace(':', ''), '%Y-%m-%d')
+                last_modif_dt = datetime.strptime(
+                    last_modif_dt.replace(':', ''), '%Y-%m-%d')
 
                 if last_modif_dt.date() >= self.until_date and last_modif_dt.date() <= self.start_date:
                     yield Request(url=link, callback=self.parse_sub_sitemap, priority=1)
@@ -55,7 +55,8 @@ class RussiaTodaySpider(NewsSpider):
         if self.start_date >= datetime.strptime(max(last_modif_dts).replace(':', ''), '%Y-%m-%dT%H%M%S%z').date() >= self.until_date:
             for link, last_modif_dt in zip(links, last_modif_dts):
                 # Convert last_modif_dt to datetime
-                last_modif_dt = datetime.strptime(last_modif_dt.replace(':', ''), '%Y-%m-%dT%H%M%S%z')
+                last_modif_dt = datetime.strptime(
+                    last_modif_dt.replace(':', ''), '%Y-%m-%dT%H%M%S%z')
                 if self.start_date >= last_modif_dt.date() >= self.until_date:
                     yield Request(url=link, callback=self.parse_document, priority=100)
 
@@ -123,9 +124,11 @@ class RussiaTodaySpider(NewsSpider):
         for item in super().parse_document(response):
             # Try to drop timezone postfix.
             if 'tags' in item:
-                item['tags'] = [tag.strip() for tag in item['tags'] if tag.strip()]
+                item['tags'] = [tag.strip()
+                                for tag in item['tags'] if tag.strip()]
             if 'subtitle' in item:
-                item['subtitle'] = [s.strip() for s in item['subtitle'] if s.strip()]
+                item['subtitle'] = [s.strip()
+                                    for s in item['subtitle'] if s.strip()]
             try:
                 item['date'] = self._fix_syntax(item['date'], -6)
             except KeyError:
