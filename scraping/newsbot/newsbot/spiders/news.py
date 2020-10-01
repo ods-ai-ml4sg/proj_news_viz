@@ -1,10 +1,9 @@
-from urllib.parse import urlsplit
 from datetime import datetime, timedelta
+from urllib.parse import urlsplit
 
 import scrapy
-from scrapy.loader import ItemLoader
-
 from newsbot.items import Document
+from scrapy.loader import ItemLoader
 
 
 class NewsSpiderConfig:

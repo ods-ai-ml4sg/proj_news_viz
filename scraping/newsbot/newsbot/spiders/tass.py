@@ -1,7 +1,8 @@
+import re
+from datetime import datetime
+
 from newsbot.spiders.news import NewsSpider, NewsSpiderConfig
 from scrapy import Request, Selector
-from datetime import datetime
-import re
 
 
 class RussiaTassSpider(NewsSpider):

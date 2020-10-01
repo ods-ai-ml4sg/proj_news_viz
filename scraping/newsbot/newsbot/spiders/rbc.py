@@ -1,11 +1,10 @@
-from datetime import datetime
-import time
 import json
+import time
+from datetime import datetime
 
 import scrapy
-from scrapy.http import HtmlResponse
-
 from newsbot.spiders.news import NewsSpider, NewsSpiderConfig
+from scrapy.http import HtmlResponse
 
 
 class RbcSpider(NewsSpider):

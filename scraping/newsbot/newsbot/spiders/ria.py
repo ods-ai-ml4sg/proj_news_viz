@@ -1,7 +1,7 @@
-from datetime import datetime, timedelta
 import re
-import lxml.html
+from datetime import datetime, timedelta
 
+import lxml.html
 import scrapy
 from newsbot.spiders.news import NewsSpider, NewsSpiderConfig
 from scrapy.linkextractors import LinkExtractor

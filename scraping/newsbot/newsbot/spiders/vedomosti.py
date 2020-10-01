@@ -1,11 +1,10 @@
-from datetime import datetime
 import json
+from datetime import datetime
 
 import scrapy
-from scrapy.linkextractors import LinkExtractor
-from scrapy.http import HtmlResponse
-
 from newsbot.spiders.news import NewsSpider, NewsSpiderConfig
+from scrapy.http import HtmlResponse
+from scrapy.linkextractors import LinkExtractor
 
 
 class VedomostiSpider(NewsSpider):

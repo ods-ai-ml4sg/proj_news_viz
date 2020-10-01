@@ -1,8 +1,7 @@
 from datetime import datetime
 
-from scrapy import Request, Selector
-
 from newsbot.spiders.news import NewsSpider, NewsSpiderConfig
+from scrapy import Request, Selector
 
 
 class GazetaSpider(NewsSpider):

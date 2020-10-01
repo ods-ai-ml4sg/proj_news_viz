@@ -1,9 +1,8 @@
 from datetime import datetime, timedelta
 
 import scrapy
-from scrapy.linkextractors import LinkExtractor
-
 from newsbot.spiders.news import NewsSpider, NewsSpiderConfig
+from scrapy.linkextractors import LinkExtractor
 
 
 class KommersantSpider(NewsSpider):

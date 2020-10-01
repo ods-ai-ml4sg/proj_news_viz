@@ -2,10 +2,8 @@ import json
 from datetime import datetime
 
 import scrapy
-from newsbot.spiders.news import NewsSpider
-from newsbot.spiders.news import NewsSpiderConfig
-from scrapy import Request
-from scrapy import Selector
+from newsbot.spiders.news import NewsSpider, NewsSpiderConfig
+from scrapy import Request, Selector
 from scrapy.linkextractors import LinkExtractor
 
 
