@@ -1,98 +1,95 @@
-import json
 import re
 from datetime import datetime
-from urllib.parse import urlsplit
 
-import scrapy
-from scrapy.linkextractors import LinkExtractor
-from scrapy.loader import ItemLoader
-
-from newsbot.items import Document
-from newsbot.spiders.news import NewsSpider, NewsSpiderConfig
+from newsbot.spiders.news import NewsSpider
+from newsbot.spiders.news import NewsSpiderConfig
+from scrapy import Request
+from scrapy import Selector
 
 
 class RussiaTassSpider(NewsSpider):
     name = "tass"
-    start_urls = ["https://tass.ru/"]
+    start_urls = ["https://tass.ru/sitemap.xml"]
     config = NewsSpiderConfig(
-        title_path='_',
-        date_path='_',
-        date_format="%Y-%m-%d %H:%M:%S",
-        text_path="div.text-content>div.text-block ::text",
-        topics_path='_',
-        authors_path='_',
-        reposts_fb_path='_',
-        reposts_vk_path='_',
-        reposts_ok_path='_',
-        reposts_twi_path='_',
-        reposts_lj_path='_',
-        reposts_tg_path='_',
-        likes_path='_',
-        views_path='_',
-        comm_count_path='_'
+        title_path=
+        '//h1[contains(@class, "news-header__title") or contains(@class, "explainer__title") or contains(@class, "article__title")]//text()',
+        subtitle_path='//div[contains(@class, "news-header__lead")]//text()',
+        date_path='//dateformat[@mode="abs"]/@time',
+        date_format="%Y-%m-%dT%H%M%S%z",
+        text_path='//div[contains(@class, "text-block")]/p//text()',
+        topics_path="//title/text()",
+        tags_path='//a[contains(@class, "tags__item")]//text()',
+        subtopics_path="_",
+        authors_path="_",
+        reposts_fb_path="_",
+        reposts_vk_path="_",
+        reposts_ok_path="_",
+        reposts_twi_path="_",
+        reposts_lj_path="_",
+        reposts_tg_path="_",
+        likes_path="_",
+        views_path="_",
+        comm_count_path="_",
     )
-    custom_settings = {
-        "DEPTH_LIMIT": 4,
-        "DEPTH_STATS": True,
-        "DEPTH_STATS_VERBOSE": True,
-        "DOWNLOAD_DELAY": 10,
-        "RANDOMIZE_DOWNLOAD_DELAY": True,
-    }
-    category_le = LinkExtractor(restrict_css='ul.menu-sections-list>li>div.menu-sections-list__title-wrapper')
 
     def parse(self, response):
-        for link in self.category_le.extract_links(response):
-            yield scrapy.Request(url=link.url,
-                                 priority=100,
-                                 callback=self.parse_news_category,
-                                 meta={}
-                                 )
+        # Parse main sitemap
+        body = response.body
+        links = Selector(text=body).xpath("//loc/text()").getall()
+        last_modif_dts = Selector(text=body).xpath("//lastmod/text()").getall()
+        print(last_modif_dts[0], last_modif_dts[-1])
+        if (self.start_date >= datetime.strptime(
+                max(last_modif_dts).replace(":", ""),
+                "%Y-%m-%dT%H%M%S%z").date() >= self.until_date):
+            for link, last_modif_dt in zip(links, last_modif_dts):
+                # Convert last_modif_dt to datetime
+                last_modif_dt = datetime.strptime(
+                    last_modif_dt.replace(":", ""), "%Y-%m-%dT%H%M%S%z")
 
-    def parse_news_category(self, response):
-        news_section = response.css("section#news-list::attr(ng-init)").extract_first(default="")
+                if (last_modif_dt.date() >= self.until_date
+                        and last_modif_dt.date() <= self.start_date):
+                    yield Request(url=link,
+                                  callback=self.parse_sub_sitemap,
+                                  priority=1)
 
-        section_id = re.findall("sectionId\s+=\s+(.*?);", news_section)[0]
-        exclude_ids = re.findall("excludeNewsIds\s*?=\s*?\'(.*)\';", news_section)[0]
-
-        paging_data = {"sectionId": int(section_id),
-                       "limit": 20,
-                       "type": "",
-                       "excludeNewsIds": exclude_ids,
-                       "imageSize": 434, }
-        yield self._create_api_request(paging_data, response.url)
-
-    def _create_api_request(self, data, referer):
-        return scrapy.Request(url="https://tass.ru/userApi/categoryNewsList",
-                              method="POST",
-                              body=json.dumps(data),
-                              dont_filter=True,
-                              headers={'Content-Type': 'application/json',
-                                       'Referer': referer},
-                              callback=self.parse_news_list,
-                              meta={"data": data, "referer": referer})
-
-    def parse_news_list(self, response):
-        news_data = json.loads(response.body)
-        last_time = news_data.get("lastTime", 0)
-        data = response.meta["data"]
-        referer = response.meta["referer"]
-        data["timestamp"] = last_time
-        yield self._create_api_request(data, referer)
-        for news_item in news_data["newsList"]:
-            url = response.urljoin(news_item["link"])
-            yield scrapy.Request(url, callback=self.parse_document, meta={"news_item": news_item})
+    def parse_sub_sitemap(self, response):
+        # Parse sub sitemaps
+        body = response.body
+        links = Selector(text=body).xpath("//loc/text()").getall()
+        last_modif_dts = Selector(text=body).xpath("//lastmod/text()").getall()
+        if (self.start_date >= datetime.strptime(
+                max(last_modif_dts).replace(":", ""),
+                "%Y-%m-%dT%H%M%S%z").date() >= self.until_date):
+            print(max(last_modif_dts))
+            print(len(links))
+            for link, last_modif_dt in zip(links, last_modif_dts):
+                # Convert last_modif_dt to datetime
+                last_modif_dt = datetime.strptime(
+                    last_modif_dt.replace(":", ""), "%Y-%m-%dT%H%M%S%z")
+                if self.start_date >= last_modif_dt.date() >= self.until_date:
+                    yield Request(
+                        url=link,
+                        callback=self.parse_document,
+                        priority=100,
+                        meta={
+                            "date": last_modif_dt.strftime("%Y-%m-%dT%H%M%S%z")
+                        },
+                    )
 
     def parse_document(self, response):
-        news_item = response.meta["news_item"]
-        url = response.url
-        base_edition = urlsplit(self.start_urls[0])[1]
-        edition = urlsplit(url)[1]
+        print("here")
+        for item in super().parse_document(response):
+            print("one more")
+            item["date"] = [response.meta.get("date")]
+            if "text" in item:
+                if re.search("/.+/. ([\d\D]+)", item["text"][0]):
+                    item["text"][0] = re.search("/.+/. ([\d\D]+)",
+                                                item["text"][0]).group(1)
+            if "topics" in item:
+                item["topics"] = [
+                    re.search(r"-([\s\w]+)-", topic).group(1).strip()
+                    for topic in item["topics"]
+                    if re.search(r"-([\s\w]+)-", topic)
+                ]
 
-        l = ItemLoader(item=Document(), response=response)
-        l.add_value('url', url)
-        l.add_value('edition', '-' if edition == base_edition else edition)
-        l.add_value('title', news_item["title"])
-        l.add_value('topics', "")
-        l.add_value('date', datetime.fromtimestamp(news_item["date"]).strftime(self.config.date_format))
-        l.add_css('text', self.config.text_path)
-        yield l.load_item()
+            yield item

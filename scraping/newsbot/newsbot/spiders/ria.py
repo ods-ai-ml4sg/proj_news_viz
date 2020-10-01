@@ -1,71 +1,94 @@
+import re
 from datetime import datetime
+from datetime import timedelta
 
-import requests
 import lxml.html
-
 import scrapy
-from newsbot.spiders.news import NewsSpider, NewsSpiderConfig
+from newsbot.spiders.news import NewsSpider
+from newsbot.spiders.news import NewsSpiderConfig
 from scrapy.linkextractors import LinkExtractor
 
 
 class RiaSpider(NewsSpider):
-    name = 'ria'
-    start_urls = ['https://www.ria.ru']
+    name = "ria"
+    dt = datetime.now()
+    link_tmpl = "https://www.ria.ru/{}/"
+    start_urls = [link_tmpl.format(str(dt.year) + str(dt.month) + str(dt.day))]
     config = NewsSpiderConfig(
         title_path='//h1[contains(@class, "article__title")]/text()',
+        subtitle_path="_",
         date_path='//div[contains(@class, "endless__item")]/@data-published',
-        date_format='%Y-%m-%dT%H:%MZ',
-        text_path='//div[contains(@class, "article__block") and @data-type = "text"]//text()',
-        topics_path='//a[contains(@class, "article__tags-item")]/text()',
-        authors_path='_',
-        reposts_fb_path='_',
-        reposts_vk_path='_',
-        reposts_ok_path='_',
-        reposts_twi_path='_',
-        reposts_lj_path='_',
-        reposts_tg_path='_',
+        date_format="%Y-%m-%dT%H:%MZ",
+        text_path=
+        '//div[contains(@class, "article__block") and @data-type = "text"]//text()',
+        topics_path=
+        '//div[contains(@class, "endless__item")]/@data-analytics-rubric',
+        subtopics_path="_",
+        authors_path="_",
+        tags_path='//div[contains(@class, "endless__item")]/@data-keywords',
+        reposts_fb_path="_",
+        reposts_vk_path="_",
+        reposts_ok_path="_",
+        reposts_twi_path="_",
+        reposts_lj_path="_",
+        reposts_tg_path="_",
         likes_path='//span[contains(@class,"m-value")]/text()',
         views_path='//span[contains(@class,"statistic__item m-views")]/text()',
-        comm_count_path='_'
+        comm_count_path="_",
     )
-    news_le = LinkExtractor(restrict_css='div.lenta__item')
+    news_le = LinkExtractor(restrict_css="div.lenta__item")
 
     def parse(self, response):
-        article_links = self.news_le.extract_links(response)
+        news_le = LinkExtractor(restrict_css="div.lenta__item")
 
-        last_link = ''
+        article_links = news_le.extract_links(response)
+
         for link in article_links:
-            last_link = link.url
+            yield scrapy.Request(url=link.url,
+                                 callback=self.parse_document,
+                                 priority=100)
 
-            yield scrapy.Request(url=link.url, callback=self.parse_document)
+        adding = response.xpath(
+            '//div[contains(@class, "list-more")]/@data-url').get()
+        if adding:
+            new_url = "https://www.ria.ru" + adding
+            if self.start_date >= self.dt.date() >= self.until_date:
+                yield scrapy.Request(url=new_url, callback=self.parse_next)
 
-        dt = self._get_last_dt_on_page(last_link)
+        self.dt -= timedelta(days=1)
 
-        if datetime.strptime(dt, self.config.date_format).date() >= self.until_date:
-            # Getting and forming the next page link
-            next_page_link = response.xpath('//div[contains(@class, "lenta__item")]/@data-next').extract()[0]
-            link_url = '{}{}'.format(self.start_urls[0], next_page_link)
+        if self.start_date >= self.dt.date() >= self.until_date:
+            new_url = self.link_tmpl.format(
+                str(self.dt.year) + str(self.dt.month) + str(self.dt.day))
+            yield scrapy.Request(url=new_url, callback=self.parse)
 
-            yield scrapy.Request(url=link_url,
-                                 priority=100,
-                                 callback=self.parse,
-                                 meta={'page_depth': response.meta.get('page_depth', 1) + 1}
-                                 )
+    def parse_next(self, response):
+
+        news_le = LinkExtractor(restrict_css="div.list-item__content")
+
+        article_links = news_le.extract_links(response)
+        for link in article_links:
+            yield scrapy.Request(url=link.url,
+                                 callback=self.parse_document,
+                                 priority=100)
+
+        adding = response.xpath(
+            '//div[contains(@class, "list-items-loaded")]/@data-next-url').get(
+            )
+
+        if adding:
+            new_url = "https://www.ria.ru" + adding
+            yield scrapy.Request(
+                url=new_url,
+                callback=self.parse_next,
+            )
 
     def parse_document(self, response):
         for res in super().parse_document(response):
-            # Leave only the last tag
-            # (the last tag is always a global website tag)
-            res['topics'] = [res['topics'][-1]]
+
+            authors = re.search(r"- РИА Новости, ([\w\s,]+)", res["text"][0])
+            if authors:
+                res["authors"] = authors.group(1).split(", ")
+            res["text"] = res["text"][1:]
 
             yield res
-
-    def _get_last_dt_on_page(self, link):
-        r = requests.get(link)
-        source_code = r.text
-
-        root = lxml.html.fromstring(source_code)
-
-        dt = root.xpath(self.config.date_path)[0]
-
-        return dt

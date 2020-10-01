@@ -12,22 +12,18 @@ class RussiaTodaySpider(NewsSpider):
     start_urls = ["https://russian.rt.com/sitemap.xml"]
 
     config = NewsSpiderConfig(
-        title_path="//h1/text()",
-        date_path='//meta[contains(@name, "mediator_published_time")]/@content'
-        ' | //span[@class="main-page-heading__date"]/text()',
+        title_path='//h1[contains(@class, "article__heading")]/text()',
+        subtitle_path="_",
+        date_path="//meta"
+        '[contains(@name, "mediator_published_time")]/@content',
         date_format="%Y-%m-%dT%H:%M:%S",
-        text_path='//div[contains(@class, "article__text")]'
-        '//*[not(contains(@class, "read-more")) and '
-        'not(contains(@class, "article__cover"))]//text()'
-        ' | //meta[contains(@name, "description")]/@content'
-        ' | //div[@class="page-content"]/p/text()'
-        ' | //div[@class="page-content"]/blockquote/p/text()'
-        ' | //div[@class="page-content"]/p/a/text()'
-        ' | //div[@class="page-content"]/h2/strong/text()',
-        topics_path='//meta[contains(@name, "mediator_theme")]/@content'
-        ' | //h2[@class="main-page-heading__tag"]/text()',
-        authors_path='//meta[contains(@name, "mediator_author")]/@content'
-        ' | //span[@class="main-page-heading__author"]/text()',
+        text_path=
+        '//div[contains(@class, "article__text") or contains(@class, "article__summary")]//text()',
+        topics_path='//meta[contains(@name, "mediator_theme")]/@content',
+        subtopics_path=
+        '//a[@data-trends-link=substring(//div[contains(@class, "layout__control-width")]/script, 50, 24)]//text()',
+        authors_path='//meta[contains(@name, "mediator_author")]/@content',
+        tags_path='//a[contains(@rel, "tag")]//text()',
         reposts_fb_path="_",
         reposts_vk_path="_",
         reposts_ok_path="_",
@@ -40,32 +36,57 @@ class RussiaTodaySpider(NewsSpider):
     )
 
     def parse(self, response):
-        """Parse first main sitemap.xml by initial parsing method.
-        Getting sub_sitemaps.
-        """
+        # Parse main sitemap
         body = response.body
         links = Selector(text=body).xpath("//loc/text()").getall()
+        last_modif_dts = Selector(text=body).xpath("//lastmod/text()").getall()
+        if (self.start_date >= datetime.strptime(
+                max(last_modif_dts).replace(":", ""), "%Y-%m-%d").date() >=
+                self.until_date):
+            for link, last_modif_dt in zip(links, last_modif_dts):
+                # Convert last_modif_dt to datetime
+                last_modif_dt = datetime.strptime(
+                    last_modif_dt.replace(":", ""), "%Y-%m-%d")
 
-        for link in links:
-            yield Request(url=link, callback=self.parse_sitemap)
+                if (last_modif_dt.date() >= self.until_date
+                        and last_modif_dt.date() <= self.start_date):
+                    yield Request(url=link,
+                                  callback=self.parse_sub_sitemap,
+                                  priority=1)
 
-    def parse_sitemap(self, response):
-        """Parse each sub_sitemap. There is no today's news.
-        """
+    def parse_sub_sitemap(self, response):
+        # Parse sub sitemaps
         body = response.body
         links = Selector(text=body).xpath("//loc/text()").getall()
-        lm_datetimes = Selector(text=body).xpath("//lastmod/text()").getall()
+        last_modif_dts = Selector(text=body).xpath("//lastmod/text()").getall()
+        if (self.start_date >= datetime.strptime(
+                max(last_modif_dts).replace(":", ""),
+                "%Y-%m-%dT%H%M%S%z").date() >= self.until_date):
+            for link, last_modif_dt in zip(links, last_modif_dts):
+                # Convert last_modif_dt to datetime
+                last_modif_dt = datetime.strptime(
+                    last_modif_dt.replace(":", ""), "%Y-%m-%dT%H%M%S%z")
+                if self.start_date >= last_modif_dt.date() >= self.until_date:
+                    yield Request(url=link,
+                                  callback=self.parse_document,
+                                  priority=100)
+        """def parse_articles_sitemap(self, response):
+        # Parse sub sitemaps
+        body = response.body
+        links = Selector(text=body).xpath('//loc/text()').getall()
+        last_modif_dts = Selector(text=body).xpath('//lastmod/text()').getall()
+        print('gere', len(links))
+        if self.start_date >= datetime.strptime(max(last_modif_dts).replace(':', ''), '%Y-%m-%dT%H%M%S%z').date() >= self.until_date:
+            for link, last_modif_dt in zip(links, last_modif_dts):
+                # Convert last_modif_dt to datetime
+                last_modif_dt = datetime.strptime(last_modif_dt.replace(':', ''), '%Y-%m-%dT%H%M%S%z')
 
-        for i in range(len(links)):
-            if "https://russian.rt.com/tag/" not in links[i]:
-                if (datetime.strptime(lm_datetimes[i][:22] + "00",
-                                      "%Y-%m-%dT%H:%M:%S%z").date() >=
-                        self.until_date):
-                    yield Request(url=links[i], callback=self.parse_document)
+                if last_modif_dt.date() >= self.until_date and last_modif_dt.date() <= self.start_date:
+                    if link.endswith('.shtml') and not link.endswith('index.shtml'):
+                        yield Request(url=link, callback=self.parse_document, priority=1000)"""
 
     def fix_date(self, raw_date):
-        """Fix date for regular and authors articles
-        """
+        """Fix date for regular and authors articles"""
         months_ru = [
             "января",
             "февраля",
@@ -91,8 +112,7 @@ class RussiaTodaySpider(NewsSpider):
                                      "%d %m %Y,").strftime("%Y-%m-%dT%H:%M:%S")
 
     def cut_instagram(self, raw_text):
-        """Cut instagram quote
-        """
+        """Cut instagram quote"""
         clear_text = []
         i = 0
         while i < len(raw_text):
@@ -110,6 +130,18 @@ class RussiaTodaySpider(NewsSpider):
         """Final parsing method.
         Parse each article."""
         for item in super().parse_document(response):
-            item["date"] = self.fix_date(item["date"])
-            item["text"] = self.cut_instagram(item["text"])
-            yield item
+            # Try to drop timezone postfix.
+            if "tags" in item:
+                item["tags"] = [
+                    tag.strip() for tag in item["tags"] if tag.strip()
+                ]
+            if "subtitle" in item:
+                item["subtitle"] = [
+                    s.strip() for s in item["subtitle"] if s.strip()
+                ]
+            try:
+                item["date"] = self._fix_syntax(item["date"], -6)
+            except KeyError:
+                print("Error. No date value.")
+            else:
+                yield item
