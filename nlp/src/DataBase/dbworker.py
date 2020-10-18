@@ -6,6 +6,7 @@ from uuid import uuid4
 
 from dbconnector import UseDatabase
 from dbconnector import UseDatabaseCusror
+
 # Коннектор к базе данных
 
 
@@ -38,7 +39,7 @@ class Dbwriter(object):
 
         # database connect
         config = configparser.ConfigParser()
-        config.read("../../../config/db.ini")
+        config.read("../../config/db.ini")
 
         dbconfig = {
             "host": config["dev"]["host"],
