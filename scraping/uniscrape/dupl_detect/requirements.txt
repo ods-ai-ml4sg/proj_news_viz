@@ -1,4 +1,4 @@
-bleach==2.1.4
+bleach==3.3.0
 html5lib==1.0.1
 lmdb==0.94
 six==1.11.0
